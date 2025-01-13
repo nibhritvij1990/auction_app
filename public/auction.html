@@ -19,33 +19,7 @@
       background-color: #ffffff;
     }
     /* Basic modal styling */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 999;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.4);
-    }
-    .modal-content {
-      background-color: #fff;
-      margin: 10% auto;
-      padding: 20px;
-      width: 400px;
-      border-radius: 5px;
-    }
-    .closeModal {
-      float: right;
-      cursor: pointer;
-      color: #aaa;
-      font-weight: bold;
-    }
-    .closeModal:hover {
-      color: #000;
-    }
+   
     #headerStrip {
         height: 256px;
         display: flex;
@@ -55,7 +29,7 @@
         width: 100%;
         min-width: 600px;
         padding: 0 calc(50% - 600px);
-        background: #4c3b9b;
+        background: #37246e;
         color: white;
         box-sizing: border-box;
     }
@@ -234,7 +208,7 @@
   <!-- TEAM MODALS (Create/Edit) -->
   <div id="createTeamModal" class="modal">
     <div class="modal-content">
-      <span class="closeModal" id="closeCreateTeamModalBtn">&times;</span>
+      <span class="closeModal" id="closeCreateTeamModalBtn"><span class="material-icons-outlined">close</span></span>
       <h3>Create Team</h3>
       <form id="createTeamForm" encType="multipart/form-data">
         <input type="hidden" name="auction_id" id="teamAuctionIdInput"/>
@@ -265,7 +239,7 @@
 
   <div id="editTeamModal" class="modal">
     <div class="modal-content">
-      <span class="closeModal" id="closeEditTeamModalBtn">&times;</span>
+      <span class="closeModal" id="closeEditTeamModalBtn"><span class="material-icons-outlined">close</span></span>
       <h3>Edit Team</h3>
       <form id="editTeamForm" encType="multipart/form-data">
         <input type="hidden" name="auction_id" id="editTeamAuctionIdInput"/>
@@ -298,7 +272,7 @@
   <!-- PLAYER MODALS (Create/Edit) -->
   <div id="createPlayerModal" class="modal">
     <div class="modal-content">
-      <span class="closeModal" id="closeCreatePlayerModalBtn">&times;</span>
+      <span class="closeModal" id="closeCreatePlayerModalBtn"><span class="material-icons-outlined">close</span></span>
       <h3>Create Player</h3>
       <form id="createPlayerForm" encType="multipart/form-data">
         <input type="hidden" name="auction_id" id="playerAuctionIdInput"/>
@@ -333,7 +307,7 @@
 
   <div id="editPlayerModal" class="modal">
     <div class="modal-content">
-      <span class="closeModal" id="closeEditPlayerModalBtn">&times;</span>
+      <span class="closeModal" id="closeEditPlayerModalBtn"><span class="material-icons-outlined">close</span></span>
       <h3>Edit Player</h3>
       <form id="editPlayerForm" encType="multipart/form-data">
         <input type="hidden" name="auction_id" id="editPlayerAuctionIdInput"/>
@@ -370,7 +344,7 @@
   <!-- INCREMENTS MODAL: ADD INCREMENT -->
   <div id="addIncrementModal" class="modal">
     <div class="modal-content">
-      <span class="closeModal" id="closeAddIncrementModalBtn">&times;</span>
+      <span class="closeModal" id="closeAddIncrementModalBtn"><span class="material-icons-outlined">close</span></span>
       <h3>Add Increment</h3>
       <form id="addIncrementForm">
         <div>
@@ -389,7 +363,7 @@
   <!-- BULK MODAL -->
   <div id="bulkModal" class="modal" style="display:none;">
     <div class="modal-content">
-      <span id="closeBulkModal" class="closeModal">&times;</span>
+      <span id="closeBulkModal" class="closeModal"><span class="material-icons-outlined">close</span></span>
       <h3 id="bulkModalTitle"></h3>
       <textarea id="bulkJsonInput" style="width:100%; height:200px;"></textarea>
       <button id="bulkSubmitBtn">Submit</button>
@@ -671,12 +645,12 @@
       let html = `<div class="tabContent-header">
                     <h2>Players</h2>
                     <div class="tabContent-header-right">
-                        <button class="controlBtns controlBtns-big" onclick="openCreatePlayerModal()"><span class="material-icons-outlined">person_add</span></button>
-                        <button class="controlBtns controlBtns-big" id="markAllUnsoldBtnAdmin"><span class="material-icons-outlined">currency_exchange</span></button>
-                        <button class="controlBtns controlBtns-big" id="exportPlayersDataButton"><span class="material-icons-outlined">download</span></button>
-                        <button class="controlBtns controlBtns-big" id="bulkCreatePlayersBtn"><span class="material-icons-outlined">playlist_add</span></button>
-                        <button class="controlBtns controlBtns-big" id="bulkUpdatePlayersBtn"><span class="material-icons-outlined">edit_note</span></button>
-                        <button class="controlBtns controlBtns-big delete-btn" id="deleteAllPlayersButton"><span class="material-icons-outlined">delete_sweep</span></button>
+                        <button class="controlBtns controlBtns-big" onclick="openCreatePlayerModal()"><span class="tooltip tooltip-top-right">Create Player</span><span class="material-icons-outlined">person_add</span></button>
+                        <button class="controlBtns controlBtns-big" id="markAllUnsoldBtnAdmin"><span class="tooltip tooltip-top-right">Mark All Unsold → Available</span><span class="material-icons-outlined">currency_exchange</span></button>
+                        <button class="controlBtns controlBtns-big" id="exportPlayersDataButton"><span class="tooltip tooltip-top-right">Export Players</span><span class="material-icons-outlined">download</span></button>
+                        <button class="controlBtns controlBtns-big" id="bulkCreatePlayersBtn"><span class="tooltip tooltip-top-right">Bulk Create</span><span class="material-icons-outlined">playlist_add</span></button>
+                        <button class="controlBtns controlBtns-big" id="bulkUpdatePlayersBtn"><span class="tooltip tooltip-top-right">Bulk Edit</span><span class="material-icons-outlined">edit_note</span></button>
+                        <button class="controlBtns controlBtns-big delete-btn" id="deleteAllPlayersButton"><span class="tooltip tooltip-top-right">Delete All</span><span class="material-icons-outlined">delete_sweep</span></button>
                     </div>
                   </div>
                   <div id="players-container">`;

@@ -107,7 +107,7 @@
         <div><span id="headerUserName">UserName</span></div>
     </header>
     <div id="bodyContainer">
-  <span id="pageTitle"><h1>Auction Dashboard</h1>
+  <span id="pageTitle"><h1>Admin Dashboard</h1>
   <span><button id="createAuctionBtn" class="adminOnly"><span class="tooltip">Create Auction</span><span class="material-icons-outlined">library_add</span></button></span></span>
   <p id="statusMsg"></p>
 
@@ -331,9 +331,9 @@
                 <p>Team Purse: ${a.base_budget}</p>
                 <p>Base Price: ${a.base_price}</p>
                 <div id="controlButtons">
-                    <button class="controlBtns adminOnly" onclick="editAuction('${a._id}')"><span class="material-icons">edit</span></button>
-                    <button class="controlBtns adminOnly" onclick="manageAuction('${a._id}')"><span class="material-icons">settings</span></button>
-                    <button class="controlBtns" onclick="openDashboard('${a._id}')"><span class="material-icons">monitor</span></button>
+                    <button class="controlBtns adminOnly" onclick="editAuction('${a._id}')"><span class="tooltip tooltip-top-left">Edit</span><span class="material-icons">edit</span></button>
+                    <button class="controlBtns adminOnly" onclick="manageAuction('${a._id}')"><span class="tooltip tooltip-top-left">Manage</span><span class="material-icons">settings</span></button>
+                    <button class="controlBtns" onclick="openDashboard('${a._id}')"><span class="tooltip tooltip-top-left">Console</span><span class="material-icons">monitor</span></button>
                     <button class="controlBtns adminOnly delete-btn" onclick="deleteAuction('${a._id}')"><span class="material-icons">delete</span></button>
                 </div>
             </div>

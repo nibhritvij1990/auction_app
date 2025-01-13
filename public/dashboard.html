@@ -445,7 +445,7 @@
       <div id="bidding-tools">
         <!-- Existing content inside #bidding-tools ... -->
         <div class="adminOnly">
-          <span><button id="nextPlayerBtn" style="zoom: 0.8;"><span class="material-icons">hail</span></button></span>
+          <span><button id="nextPlayerBtn"><span class="tooltip tooltip-right">Next Random Player</span><span class="material-icons">hail</span></button></span>
           <span><strong>Set:</strong>
           <select id="setSelect"></select>
           <button id="selectSetBtn" style="zoom: 0.8;"><span class="material-icons">check</span></button></span>
@@ -454,10 +454,10 @@
           <div id="teamBidButtonsDiv"></div>
         </div>
         <div class="adminOnly">
-          <span><button id="undoBidBtn"><span class="material-icons">settings_backup_restore</span></button></span>
+          <span><button id="undoBidBtn"><span class="tooltip tooltip-right">Undo Last Bid</span><span class="material-icons">settings_backup_restore</span></button></span>
           <span>
-            <button id="markSoldBtn"><span class="material-icons">add_shopping_cart</span></button>
-            <button id="markUnsoldBtn"><span class="material-icons">remove_shopping_cart</span></button>
+            <button id="markSoldBtn"><span class="tooltip tooltip-bottom-right">Mark As Sold</span><span class="material-icons">add_shopping_cart</span></button>
+            <button id="markUnsoldBtn"><span class="tooltip tooltip-bottom-right">Mark As Unsold</span><span class="material-icons">remove_shopping_cart</span></button>
           </span>
         </div>
         <a id="openSummaryPage" href="./summary.html" target="_blank" class="button"><span class="material-icons">article</span>Summary</a>

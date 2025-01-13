@@ -226,7 +226,7 @@ header span {
 .tooltip-right:before {
     border-left: 6px solid transparent;
     border-right: 6px solid #444;
-    left: -9%;
+    left: -12px;
 }
 .tooltip-bottom-right {
     transform: translate(0%, 150%);

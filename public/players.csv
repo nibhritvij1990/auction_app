@@ -1,0 +1,13 @@
+_id,full_name,image,category,base_price,auction_set,auction_id,ch_profile,email,phone_number,matches,runs,avg,sr,overs,wkts,econ,notes,status,final_bid,sold_to_team_id,__v
+677d04912d2cdad7c623c5b3,testing player,https://superplayerauction.com/user/static/media/logo-auction.e6b9bfb3.png,,25,Set A,677cd0286877dbfe9da743a6,,,,0,0,0,0,0,0,0,,sold,35,,0
+677d050e08602ca9f3bd2524,nibhrit testers,/uploads/auction-1736246542899-396471519.jpeg,Bowler,50,Set A,677cd0286877dbfe9da743a6,,,,0,0,0,0,0,0,0,,sold,50,,0
+677d30abceface7b592de45a,abra kadabra,,,50,Set A,677cd0286877dbfe9da743a6,,,,0,0,0,0,0,0,0,,sold,90,677d083e08602ca9f3bd2547,0
+677d6a1c7426576c4352a855,Player 1,,,50,Set A,677cd0286877dbfe9da743a6,,,,0,0,0,0,0,0,0,,available,100,,0
+677d6a267426576c4352a85e,Player 2,,,50,Set A,677cd0286877dbfe9da743a6,,,,0,0,0,0,0,0,0,,unsold,50,,0
+677d6a2f7426576c4352a866,Player 3,,,50,Set A,677cd0286877dbfe9da743a6,,,,0,0,0,0,0,0,0,,sold,0,,0
+677d7b96b1a01d54cbbb4aa2,B Plaer,,,50,Set B,677cd0286877dbfe9da743a6,,,,0,0,0,0,0,0,0,,sold,70,,0
+677d7f80f1e75750c8292e92,adsasdasdad,,,50,Set B,677cd0286877dbfe9da743a6,,,,0,0,0,0,0,0,0,,sold,60,,0
+677d7f97f1e75750c8292e9b,kjhjhkjhkjhk,,,50,Set B,677cd0286877dbfe9da743a6,,,,0,0,0,0,0,0,0,,unsold,50,,0
+677d83ac58076c94d8f11a88,testing player 22,,,50,Set A,677cd0286877dbfe9da743a6,,,,0,0,0,0,0,0,0,,available,50,,0
+677d84bbe29b1130820ea725,asdasd,,,50,Set A,677cd0286877dbfe9da743a6,,,,0,0,0,0,0,0,0,,sold,80,677d7ce5b1a01d54cbbb4aab,0
+677e58d9a8fb46e49ca5fe1f,Base 0,,,50,Set C,677cd0286877dbfe9da743a6,,,,0,0,0,0,0,0,0,,unsold,50,,0

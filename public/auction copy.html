@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Manage Auction</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" />
+  <link rel="icon" href="./images/favicon.png" type="image/x-icon">
+  <style>
+    .tab-buttons > button {
+      margin-right: 10px;
+      zoom: 1.15;
+    }
+    .item-box {
+      border: 1px solid #ccc;
+      margin-bottom: 5px;
+      padding: 5px 10px;
+      background-color: #ffffff;
+    }
+    /* Basic modal styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      width: 400px;
+      border-radius: 5px;
+    }
+    .closeModal {
+      float: right;
+      cursor: pointer;
+      color: #aaa;
+      font-weight: bold;
+    }
+    .closeModal:hover {
+      color: #000;
+    }
+    #headerStrip {
+        height: 256px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: auto;
+        width: 100%;
+        min-width: 600px;
+        padding: 0 calc(50% - 600px);
+        background: #4c3b9b;
+        color: white;
+        box-sizing: border-box;
+    }
+    #headerStripLeft {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: fit-content;
+        gap: 16px;
+    }
+    #headerStripLeft > img {
+        width: 180px;
+        height: 180px;
+        background-color: #ffffff;
+    }
+    #headerStripMiddle {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        width: fit-content;
+        flex-direction: column;
+    }
+    #teams-container, #increments-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin: 32px 0;
+    }
+    .teams-item-box, .increment-item-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 350px;
+        height: 100px;
+    }
+    .teams-item-box > div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: fit-content;
+    }
+    .teams-item-box > div:nth-child(2) {
+        flex-direction: column;
+        align-items: end;
+    }
+    .teams-item-box > div > img {
+        width: 120px;
+        height: 120px;
+        background-color: #ffffff;
+    }
+    .teams-item-box > div > div {
+        display: flex;
+        align-items: left;
+        justify-content: space-between;
+        width: fit-content;
+        flex-wrap: wrap;
+        font-size: 14px;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .increment-item-box {
+        font-size: 16px;
+        width: 256px;
+    }
+    .increment-item-box > div {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        width: fit-content;
+        flex-wrap: wrap;
+        gap: 4px;
+        flex-direction: column;
+    }
+    .increment-item-box p {
+        margin: 0;
+    }
+    #players-table {
+        margin: 32px 0;
+    }
+    #players-table .item-box {
+        display: grid;
+        grid-template-columns: 2fr repeat(5, 1fr);
+        gap: 8px;
+        text-transform: capitalize;
+        margin: 0;
+    }
+    #players-table .item-box-header {
+        background-color: #c70072;
+        color: white;
+        font-weight: bold;
+    }
+    #players-table .item-box > span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 48px;
+    }
+    #players-table .item-box > span:last-child {
+        justify-content: flex-end;
+    }
+    .tabContent-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+    .tabContent-header h2 {
+        display: inline-block;
+    }
+    header button {
+        background-color: #37246e;
+    }
+    #headerStripRight button {
+        padding: 12px;
+    }
+    #headerStripRight .material-icons {
+        font-size: 32px;
+    }
+  </style>
+</head>
+<body>
+    <header>
+        <div><img src="./images/UCLauctionLogo.png" alt="Logo" /></div>
+        <div><button onclick="window.location.href='admin.html'">← Back to Admin</button><span id="headerUserName">UserName</span></div>
+    </header>
+    <div id="headerStrip">
+          <div id="headerStripLeft">
+            <img src="" alt="Logo" id="auctionLogo" />
+            <div id="headerStripMiddle">
+                <h1 id="headerStripAuctionName">Manage Auction</h1>
+                <div class="tab-buttons">
+                <button id="teamsTabBtn">Teams</button>
+                <button id="playersTabBtn">Players</button>
+                <button id="incrementsTabBtn">Increments</button>
+            </div>
+          </div>
+        </div>
+        <div id="dummyBox"></div>
+        <div id="headerStripRight">
+            <button id="auctionDashboardBtn"><span class="material-icons">monitor</span></button>
+        </div>
+    </div>
+    <div id="bodyContainer">
+  
+  
+  
+  <p id="statusMsg"></p>
+
+  
+  <div id="tabContent"></div>
+
+  <!-- TEAM MODALS (Create/Edit) -->
+  <div id="createTeamModal" class="modal">
+    <div class="modal-content">
+      <span class="closeModal" id="closeCreateTeamModalBtn">&times;</span>
+      <h3>Create Team</h3>
+      <form id="createTeamForm" encType="multipart/form-data">
+        <input type="hidden" name="auction_id" id="teamAuctionIdInput"/>
+        <div>
+          <label>Team Name:</label>
+          <input type="text" name="team_name" id="teamNameInput" required />
+        </div>
+        <div>
+          <label>Purse:</label>
+          <input type="number" name="purse" id="teamPurseInput" value="2500"/>
+        </div>
+        <div>
+          <label>Max Players:</label>
+          <input type="number" name="max_players" id="teamMaxPlayersInput" value="15"/>
+        </div>
+        <div>
+          <label>Image URL (optional):</label>
+          <input type="text" name="image_url" id="teamImageUrlInput" placeholder="http://..."/>
+        </div>
+        <div>
+          <label>Upload Logo (optional):</label>
+          <input type="file" name="image_file" id="teamImageFileInput" accept="image/*"/>
+        </div>
+        <button type="submit">Create</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="editTeamModal" class="modal">
+    <div class="modal-content">
+      <span class="closeModal" id="closeEditTeamModalBtn">&times;</span>
+      <h3>Edit Team</h3>
+      <form id="editTeamForm" encType="multipart/form-data">
+        <input type="hidden" name="auction_id" id="editTeamAuctionIdInput"/>
+        <input type="hidden" name="team_id" id="editTeamIdInput"/>
+        <div>
+          <label>Team Name:</label>
+          <input type="text" name="team_name" id="editTeamNameInput" required />
+        </div>
+        <div>
+          <label>Purse:</label>
+          <input type="number" name="purse" id="editTeamPurseInput"/>
+        </div>
+        <div>
+          <label>Max Players:</label>
+          <input type="number" name="max_players" id="editTeamMaxPlayersInput"/>
+        </div>
+        <div>
+          <label>Image URL (optional):</label>
+          <input type="text" name="image_url" id="editTeamImageUrlInput" placeholder="http://..."/>
+        </div>
+        <div>
+          <label>Upload Logo (optional):</label>
+          <input type="file" name="image_file" id="editTeamImageFileInput" accept="image/*"/>
+        </div>
+        <button type="submit">Update</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- PLAYER MODALS (Create/Edit) -->
+  <div id="createPlayerModal" class="modal">
+    <div class="modal-content">
+      <span class="closeModal" id="closeCreatePlayerModalBtn">&times;</span>
+      <h3>Create Player</h3>
+      <form id="createPlayerForm" encType="multipart/form-data">
+        <input type="hidden" name="auction_id" id="playerAuctionIdInput"/>
+        <div>
+          <label>Full Name:</label>
+          <input type="text" name="full_name" id="playerNameInput" required/>
+        </div>
+        <div>
+          <label>Category:</label>
+          <input type="text" name="category" id="playerCategoryInput" placeholder="Batsman, Bowler"/>
+        </div>
+        <div>
+          <label>Base Price (optional):</label>
+          <input type="number" name="base_price" id="playerBasePriceInput"/>
+        </div>
+        <div>
+          <label>Image URL (optional):</label>
+          <input type="text" name="image_url" id="playerImageUrlInput" placeholder="http://..."/>
+        </div>
+        <div>
+          <label>Upload Image (optional):</label>
+          <input type="file" name="image_file" id="playerImageFileInput" accept="image/*"/>
+        </div>
+        <div>
+          <label>Auction Set:</label>
+          <input type="text" name="auction_set" id="playerAuctionSetInput" >
+        </div>
+        <button type="submit">Create</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="editPlayerModal" class="modal">
+    <div class="modal-content">
+      <span class="closeModal" id="closeEditPlayerModalBtn">&times;</span>
+      <h3>Edit Player</h3>
+      <form id="editPlayerForm" encType="multipart/form-data">
+        <input type="hidden" name="auction_id" id="editPlayerAuctionIdInput"/>
+        <input type="hidden" name="player_id" id="editPlayerIdInput"/>
+        <div>
+          <label>Full Name:</label>
+          <input type="text" name="full_name" id="editPlayerNameInput" required/>
+        </div>
+        <div>
+          <label>Category:</label>
+          <input type="text" name="category" id="editPlayerCategoryInput"/>
+        </div>
+        <div>
+          <label>Base Price (optional):</label>
+          <input type="number" name="base_price" id="editPlayerBasePriceInput"/>
+        </div>
+        <div>
+          <label>Image URL (optional):</label>
+          <input type="text" name="image_url" id="editPlayerImageUrlInput" placeholder="http://..."/>
+        </div>
+        <div>
+          <label>Upload Image (optional):</label>
+          <input type="file" name="image_file" id="editPlayerImageFileInput" accept="image/*"/>
+        </div>
+        <div>
+          <label>Auction Set:</label>
+          <input type="text" name="auction_set" id="editPlayerAuctionSetInput" >
+        </div>
+        <button type="submit">Update</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- INCREMENTS MODAL: ADD INCREMENT -->
+  <div id="addIncrementModal" class="modal">
+    <div class="modal-content">
+      <span class="closeModal" id="closeAddIncrementModalBtn">&times;</span>
+      <h3>Add Increment</h3>
+      <form id="addIncrementForm">
+        <div>
+          <label>Threshold:</label>
+          <input type="number" id="incrementThresholdInput" required/>
+        </div>
+        <div>
+          <label>Amount:</label>
+          <input type="number" id="incrementAmountInput" required/>
+        </div>
+        <button type="submit">Add</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- BULK MODAL -->
+  <div id="bulkModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span id="closeBulkModal" class="closeModal">&times;</span>
+      <h3 id="bulkModalTitle"></h3>
+      <textarea id="bulkJsonInput" style="width:100%; height:200px;"></textarea>
+      <button id="bulkSubmitBtn">Submit</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    /********************************************************************
+     *  GLOBALS & SETUP
+     ********************************************************************/
+    const socket   = io();
+    const token    = localStorage.getItem('auctionToken');
+    if (!token) {
+        window.location.href = 'login.html';
+    }
+    const statusMsg= document.getElementById('statusMsg');
+    const tabContentDiv = document.getElementById('tabContent');
+
+    // Auction ID from URL
+    const params      = new URLSearchParams(window.location.search);
+    const auctionId   = params.get('auctionId') || '';
+    if (!auctionId) {
+        document.body.innerHTML = '<p>No valid Auction selected.</p>';
+    }
+
+    // Tab Buttons
+    const teamsTabBtn     = document.getElementById('teamsTabBtn');
+    const playersTabBtn   = document.getElementById('playersTabBtn');
+    const incrementsTabBtn= document.getElementById('incrementsTabBtn');
+
+    teamsTabBtn.addEventListener('click', showTeamsTab);
+    playersTabBtn.addEventListener('click', showPlayersTab);
+    incrementsTabBtn.addEventListener('click', showIncrementsTab);
+
+    /********************************************************************
+     *  ON LOAD → Show Teams tab by default
+     ********************************************************************/
+    window.onload = function() {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userRole = payload.role;
+        const userTeamId = payload.teamId;
+        if (userRole != "admin") {
+            window.location.href = 'admin.html';
+        }
+        const headerUserName = document.getElementById('headerUserName');
+        headerUserName.innerText = userRole.replace(/\b\w/g, char => char.toUpperCase());
+      
+        if (auctionId) showTeamsTab();
+        else document.body.innerHTML = '<p>No valid Auction selected.</p>';
+
+
+
+        async function getAuctionDetails() {
+      if (!token) {
+        tabContentDiv.innerHTML = '<p>Not logged in.</p>';
+        return;
+      }
+      try {
+        const res = await fetch(`/api/auctions/${auctionId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          tabContentDiv.innerHTML = `<p>Error loading Auction (HTTP ${res.status}).</p>`;
+          return;
+        }
+        const auction = await res.json();
+        const auctionLogoUrl = document.getElementById('auctionLogo');
+        auctionLogoUrl.src = auction.image_url || "images/logo-auction-default.png" ;
+       document.getElementById('headerStripAuctionName').textContent = auction.name;
+       
+      } catch (err) {
+        tabContentDiv.innerHTML = '<p>Network error loading Auctions.</p>';
+      }
+    }
+
+    getAuctionDetails();
+    };
+
+    /********************************************************************
+     *  TEAMS TAB
+     ********************************************************************/
+    async function showTeamsTab() {
+      if (!token) {
+        tabContentDiv.innerHTML = '<p>Not logged in.</p>';
+        return;
+      }
+      try {
+        const res = await fetch(`/api/teams?auction_id=${auctionId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          tabContentDiv.innerHTML = `<p>Error loading teams (HTTP ${res.status}).</p>`;
+          return;
+        }
+        const teams = await res.json();
+        renderTeams(teams);
+      } catch (err) {
+        tabContentDiv.innerHTML = '<p>Network error loading teams.</p>';
+      }
+    }
+
+    function renderTeams(teams) {
+
+        let html = `<div class="tabContent-header">
+                    <h2>Teams</h2>
+                    <div class="tabContent-header-right">
+                        <button class="controlBtns controlBtns-big" onclick="openCreateTeamModal()"><span class="material-icons-outlined">group_add</span></button>
+                        </div>
+                  </div>
+                  <div id="teams-container">`;
+      if (!Array.isArray(teams) || teams.length === 0) {
+        html += '<p>No teams yet.</p>';
+      } else {
+        html += teams.map(t => {
+          return `
+            <div class="item-box teams-item-box">
+                <div><img src="${t.image || ''}" alt="Team Logo" style="width:60px; height:60px;">
+                <div>
+                    <b>${t.team_name}</b>
+                    <span>Max Players: ${t.max_players}</span><span>Current Players: ${t.current_players}</span><span>Current Purse: ${t.purse}</span>
+                </div></div>
+                <div>
+                    <button class="controlBtns" onclick="editTeam('${t._id}')"><span class="material-icons-outlined">edit</span></button>
+                    <button class="controlBtns delete-btn" onclick="deleteTeam('${t._id}')"><span class="material-icons-outlined">delete</span></button>
+                </div>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      tabContentDiv.innerHTML = html+'</div>';
+    }
+
+    // CREATE TEAM
+    const createTeamModal         = document.getElementById('createTeamModal');
+    const closeCreateTeamModalBtn = document.getElementById('closeCreateTeamModalBtn');
+    const createTeamForm          = document.getElementById('createTeamForm');
+
+    closeCreateTeamModalBtn.onclick = () => createTeamModal.style.display = 'none';
+
+    function openCreateTeamModal() {
+      document.getElementById('teamAuctionIdInput').value = auctionId;
+      document.getElementById('teamNameInput').value = '';
+      document.getElementById('teamPurseInput').value = '2500';
+      document.getElementById('teamMaxPlayersInput').value = '15';
+      document.getElementById('teamImageUrlInput').value = '';
+      document.getElementById('teamImageFileInput').value = '';
+      createTeamModal.style.display = 'block';
+    }
+
+    createTeamForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!token) return;
+      const formData = new FormData(createTeamForm);
+      try {
+        const response = await fetch('/api/teams', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          alert('Error: ' + (data.error || 'failed'));
+          return;
+        }
+        createTeamModal.style.display = 'none';
+        showTeamsTab();
+      } catch (err) {
+        alert('Network error creating team.');
+      }
+    });
+
+    // EDIT TEAM
+    const editTeamModal         = document.getElementById('editTeamModal');
+    const closeEditTeamModalBtn = document.getElementById('closeEditTeamModalBtn');
+    const editTeamForm          = document.getElementById('editTeamForm');
+
+    closeEditTeamModalBtn.onclick = () => editTeamModal.style.display = 'none';
+
+    window.editTeam = async function(teamId) {
+      try {
+        const res = await fetch(`/api/teams/${teamId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          alert('Failed to load team data for edit');
+          return;
+        }
+        const team = await res.json();
+        document.getElementById('editTeamAuctionIdInput').value = auctionId;
+        document.getElementById('editTeamIdInput').value = team._id;
+        document.getElementById('editTeamNameInput').value = team.team_name;
+        document.getElementById('editTeamPurseInput').value = team.purse;
+        document.getElementById('editTeamMaxPlayersInput').value = team.max_players;
+        document.getElementById('editTeamImageUrlInput').value = '';
+        document.getElementById('editTeamImageFileInput').value = '';
+        editTeamModal.style.display = 'block';
+      } catch (err) {
+        alert('Network error fetching team data.');
+      }
+    };
+
+    editTeamForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!token) return;
+      const formData = new FormData(editTeamForm);
+      const tId = document.getElementById('editTeamIdInput').value;
+      try {
+        const response = await fetch(`/api/teams/${tId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          alert('Error updating team: ' + (data.error || 'failed'));
+          return;
+        }
+        editTeamModal.style.display = 'none';
+        showTeamsTab();
+      } catch (err) {
+        alert('Network error updating team.');
+      }
+    });
+
+    window.deleteTeam = async function(teamId) {
+      if (!confirm('Are you sure you want to delete this team?')) return;
+      try {
+        const res = await fetch(`/api/teams/${teamId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          alert('Failed to delete team: ' + (data.error || 'Unknown error'));
+        } else {
+          showTeamsTab();
+        }
+      } catch (err) {
+        alert('Network error deleting team.');
+      }
+    };
+
+    /********************************************************************
+     *  PLAYERS TAB
+     ********************************************************************/
+    async function showPlayersTab() {
+      if (!token) {
+        tabContentDiv.innerHTML = '<p>Not logged in.</p>';
+        return;
+      }
+      try {
+        const res = await fetch(`/api/players?auction_id=${auctionId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          tabContentDiv.innerHTML = `<p>Error loading players (HTTP ${res.status}).</p>`;
+          return;
+        }
+        const players = await res.json();
+        renderPlayers(players);
+      } catch (err) {
+        tabContentDiv.innerHTML = '<p>Network error loading players.</p>';
+      }
+    }
+
+    function renderPlayers(players) {
+        
+        let html = `<div class="tabContent-header">
+                    <h2>Players</h2>
+                    <div class="tabContent-header-right">
+                        <button class="controlBtns controlBtns-big" onclick="openCreatePlayerModal()"><span class="material-icons-outlined">person_add</span></button>
+                        <button class="controlBtns controlBtns-big" id="markAllUnsoldBtnAdmin"><span class="material-icons-outlined">currency_exchange</span></button>
+                        <button class="controlBtns controlBtns-big" id="exportPlayersDataButton"><span class="material-icons-outlined">download</span></button>
+                        <button class="controlBtns controlBtns-big" id="bulkCreatePlayersBtn"><span class="material-icons-outlined">playlist_add</span></button>
+                        <button class="controlBtns controlBtns-big" id="bulkUpdatePlayersBtn"><span class="material-icons-outlined">edit_note</span></button>
+                        <button class="controlBtns controlBtns-big delete-btn" id="deleteAllPlayersButton"><span class="material-icons-outlined">delete_sweep</span></button>
+        </div>
+                  </div>
+                  <div id="players-container">`;
+      if (!Array.isArray(players) || players.length === 0) {
+        html += '<p>No players yet.</p>';
+      } else {
+        html += `<div id="players-table">
+                    <div class="item-box item-box-header">
+                        <span>Player Name</span>
+                        <span>Category</span>
+                        <span>Auction Set</span>
+                        <span>Base Price</span>
+                        <span>Status</span>
+                        <span>Actions</span>
+                    </div>`;
+        html += players.map(p => {
+          return `
+            <div class="item-box">
+              <span><img src="${p.image || ''}" alt="" style="width:48px; height:48px;" /><b>${p.full_name}</b></span>
+              <span>${p.category||'Category'}</span>
+              <span>${p.auction_set||'Auction Set'}</span>
+              <span>${p.base_price||'null'}</span>
+              <span>${p.status||'Status'}</span>
+              <span>
+                <button class="controlBtns" onclick="editPlayer('${p._id}')"><span class="material-icons-outlined">edit</span></button>
+                <button class="controlBtns delete-btn" onclick="deletePlayer('${p._id}')"><span class="material-icons-outlined">delete</span></button>
+              </span>
+            </div>
+          `;
+        }).join('');
+        html += `</div>`;
+      }
+      // Append additional buttons
+      html += `</div>`;
+      tabContentDiv.innerHTML = html;
+
+      // Now attach event listeners to the newly created buttons:
+      const markAllUnsoldBtnAdmin = document.getElementById('markAllUnsoldBtnAdmin');
+      markAllUnsoldBtnAdmin.addEventListener('click', markAllUnsoldPlayers);
+
+      const deleteAllPlayersButton = document.getElementById('deleteAllPlayersButton');
+      deleteAllPlayersButton.addEventListener('click', deleteAllPlayersFn);
+
+      const exportPlayersDataButton = document.getElementById('exportPlayersDataButton');
+      exportPlayersDataButton.addEventListener('click', exportPlayersDataFn);
+
+      const bulkCreateBtn = document.getElementById('bulkCreatePlayersBtn');
+      bulkCreateBtn.addEventListener('click', openBulkCreateModal);
+
+      const bulkUpdateBtn = document.getElementById('bulkUpdatePlayersBtn');
+      bulkUpdateBtn.addEventListener('click', openBulkUpdateModal);
+    }
+
+    // Mark All Unsold => Available
+    function markAllUnsoldPlayers() {
+      console.log('markAllUnsoldPlayers clicked - emitting markAllUnsoldAsAvailable');
+      socket.emit('markAllUnsoldAsAvailable', { auctionId });
+    }
+
+    socket.on('allUnsoldAsAvailableDone', (data) => {
+      console.log('All unsold -> available DONE:', data);
+      alert(`${data.modifiedCount} players were updated from unsold => available!`);
+      // Refresh the players listing
+      showPlayersTab();
+    });
+
+    // Delete All Players
+    function deleteAllPlayersFn() {
+      if (!confirm('Are you sure you want to delete ALL players for this auction?')) return;
+      fetch(`/api/players/${auctionId}/all`, {
+        method: 'DELETE'
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log('Deleted All Players:', data);
+        alert(`Deleted ${data.deletedCount} players.`);
+        showPlayersTab();
+      })
+      .catch(err => {
+        console.error('Network or server error deleting all players:', err);
+        alert('Error deleting all players. Check console.');
+      });
+    }
+
+    // Bulk Create & Bulk Update
+    const bulkModal = document.getElementById('bulkModal');
+    const bulkModalTitle = document.getElementById('bulkModalTitle');
+    const bulkJsonInput  = document.getElementById('bulkJsonInput');
+    const bulkSubmitBtn  = document.getElementById('bulkSubmitBtn');
+    const closeBulkModal = document.getElementById('closeBulkModal');
+
+    closeBulkModal.onclick = () => { bulkModal.style.display = 'none'; };
+    window.onclick = (event) => {
+      if (event.target === bulkModal) {
+        bulkModal.style.display = 'none';
+      }
+    };
+
+    function openBulkCreateModal() {
+      bulkModal.style.display = 'block';
+      bulkModalTitle.textContent = "Bulk Create Players";
+      bulkJsonInput.value = '[\n  {\n    "full_name":"Player1",\n    "base_price":50,\n    "auction_id":"'+auctionId+'"\n  }\n]';
+      bulkSubmitBtn.onclick = bulkCreateSubmit;
+    }
+
+    function openBulkUpdateModal() {
+      bulkModal.style.display = 'block';
+      bulkModalTitle.textContent = "Bulk Update Players";
+      bulkJsonInput.value = '[\n  {\n    "_id": "PlayerIdHere",\n    "base_price": 80\n  }\n]';
+      bulkSubmitBtn.onclick = bulkUpdateSubmit;
+    }
+
+    async function bulkCreateSubmit() {
+      try {
+        const rawJson = bulkJsonInput.value;
+        const playerArray = JSON.parse(rawJson);
+        const res = await fetch('/api/players/bulk-create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(playerArray)
+        });
+        const data = await res.json();
+        alert(`Inserted: ${data.insertedCount}`);
+        bulkModal.style.display = 'none';
+        showPlayersTab();
+      } catch(err) {
+        alert('Error in bulk create: ' + err.message);
+      }
+    }
+
+    async function bulkUpdateSubmit() {
+      try {
+        const rawJson = bulkJsonInput.value;
+        const updates = JSON.parse(rawJson);
+        const res = await fetch('/api/players/bulk-update', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates)
+        });
+        const data = await res.json();
+        alert(`Updated: ${data.updatedCount}`);
+        bulkModal.style.display = 'none';
+        showPlayersTab();
+      } catch(err) {
+        alert('Error in bulk update: ' + err.message);
+      }
+    }
+
+    // CREATE PLAYER
+    const createPlayerModal         = document.getElementById('createPlayerModal');
+    const closeCreatePlayerModalBtn = document.getElementById('closeCreatePlayerModalBtn');
+    const createPlayerForm          = document.getElementById('createPlayerForm');
+
+    closeCreatePlayerModalBtn.onclick = () => createPlayerModal.style.display = 'none';
+
+    function openCreatePlayerModal() {
+      document.getElementById('playerAuctionIdInput').value = auctionId;
+      playerNameInput.value      = '';
+      playerCategoryInput.value  = '';
+      playerBasePriceInput.value = '';
+      playerImageUrlInput.value  = '';
+      playerImageFileInput.value = '';
+      playerAuctionSetInput.value= '';
+      createPlayerModal.style.display = 'block';
+    }
+
+    createPlayerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!token) return;
+      const formData = new FormData(createPlayerForm);
+      try {
+        const response = await fetch('/api/players', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          alert('Error: ' + (data.error || 'failed'));
+          return;
+        }
+        createPlayerModal.style.display = 'none';
+        showPlayersTab();
+      } catch (err) {
+        alert('Network error creating player.');
+      }
+    });
+
+    // EDIT PLAYER
+    const editPlayerModal         = document.getElementById('editPlayerModal');
+    const closeEditPlayerModalBtn = document.getElementById('closeEditPlayerModalBtn');
+    const editPlayerForm          = document.getElementById('editPlayerForm');
+
+    closeEditPlayerModalBtn.onclick = () => editPlayerModal.style.display = 'none';
+
+    window.editPlayer = async function(playerId) {
+      try {
+        const res = await fetch(`/api/players/${playerId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          alert('Failed to load player data for edit');
+          return;
+        }
+        const player = await res.json();
+        document.getElementById('editPlayerAuctionIdInput').value = auctionId;
+        document.getElementById('editPlayerIdInput').value = player._id;
+        document.getElementById('editPlayerNameInput').value = player.full_name || '';
+        document.getElementById('editPlayerCategoryInput').value = player.category || '';
+        document.getElementById('editPlayerBasePriceInput').value = player.base_price || '';
+        document.getElementById('editPlayerImageUrlInput').value = '';
+        document.getElementById('editPlayerImageFileInput').value = '';
+        document.getElementById('editPlayerAuctionSetInput').value = player.auction_set || '';
+        editPlayerModal.style.display = 'block';
+      } catch (err) {
+        alert('Network error fetching player data.');
+      }
+    };
+
+    editPlayerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!token) return;
+      const formData = new FormData(editPlayerForm);
+      const pId = document.getElementById('editPlayerIdInput').value;
+      try {
+        const response = await fetch(`/api/players/${pId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          alert('Error updating player: ' + (data.error || 'failed'));
+          return;
+        }
+        editPlayerModal.style.display = 'none';
+        showPlayersTab();
+      } catch (err) {
+        alert('Network error updating player.');
+      }
+    });
+
+    window.deletePlayer = async function(playerId) {
+      if (!confirm('Are you sure you want to delete this player?')) return;
+      try {
+        const res = await fetch(`/api/players/${playerId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          alert('Failed to delete player: ' + (data.error || 'Unknown error'));
+        } else {
+          showPlayersTab();
+        }
+      } catch (err) {
+        alert('Network error deleting player.');
+      }
+    };
+
+    /********************************************************************
+     *  INCREMENTS TAB
+     ********************************************************************/
+    async function showIncrementsTab() {
+      if (!token) {
+        tabContentDiv.innerHTML = '<p>Not logged in.</p>';
+        return;
+      }
+      try {
+        const res = await fetch(`/api/auctions/${auctionId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          tabContentDiv.innerHTML = `<p>Error loading increments (HTTP ${res.status}).</p>`;
+          return;
+        }
+        const auction = await res.json();
+        if (!auction.increments || !Array.isArray(auction.increments)) {
+          tabContentDiv.innerHTML = '<p>No increments defined yet.</p>';
+        } else {
+          renderIncrements(auction.increments);
+        }
+      } catch (err) {
+        tabContentDiv.innerHTML = '<p>Network error loading increments.</p>';
+      }
+    }
+
+    function renderIncrements(increments) {
+      let html = `<div class="tabContent-header">
+                    <h2>Increment Rules</h2>
+                    <div class="tabContent-header-right">
+                        <button class="controlBtns controlBtns-big" onclick="openAddIncrementModal()"><span class="material-icons-outlined">add_chart</span></button>
+                    </div>
+                  </div>
+                  <div id="increments-container">`;
+      if (increments.length === 0) {
+        html += '<p>No increments yet.</p>';
+      } else {
+        html += increments.map(inc => `
+          <div style="margin-bottom: 5px;" class="increment-item-box item-box">
+            <div>
+              <p>Threshold (upto): ${inc.threshold}</p><p>Increment Amount: ${inc.amount}</p>
+            </div><div>
+              <button class="controlBtns" onclick="editIncrement('${inc._id}', ${inc.threshold}, ${inc.amount})"><span class="material-icons-outlined">edit</span></button>
+              <button class="controlBtns delete-btn" onclick="deleteIncrement('${inc._id}')"><span class="material-icons-outlined">delete</span></button>
+            </div>
+          </div>
+        `).join('');
+      }
+      html += `</div>`;
+      tabContentDiv.innerHTML = html;
+    }
+
+    // ADD INCREMENT
+    const addIncrementModal         = document.getElementById('addIncrementModal');
+    const closeAddIncrementModalBtn = document.getElementById('closeAddIncrementModalBtn');
+    const addIncrementForm          = document.getElementById('addIncrementForm');
+    const incrementThresholdInput   = document.getElementById('incrementThresholdInput');
+    const incrementAmountInput      = document.getElementById('incrementAmountInput');
+
+    closeAddIncrementModalBtn.onclick = () => {
+      addIncrementModal.style.display = 'none';
+    };
+
+    function openAddIncrementModal() {
+      incrementThresholdInput.value = '';
+      incrementAmountInput.value = '';
+      addIncrementModal.style.display = 'block';
+    }
+
+    addIncrementForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!token) return;
+
+      const threshold = +incrementThresholdInput.value;
+      const amount    = +incrementAmountInput.value;
+
+      try {
+        const res = await fetch(`/api/auctions/${auctionId}/increments`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ threshold, amount })
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          alert('Error adding increment: ' + (data.error || 'Failed'));
+          return;
+        }
+        addIncrementModal.style.display = 'none';
+        showIncrementsTab();
+      } catch (err) {
+        alert('Network error adding increment.');
+      }
+    });
+
+    function editIncrement(incId, oldThreshold, oldAmount) {
+      const newThreshold = prompt("Enter new threshold:", oldThreshold);
+      if (newThreshold === null) return;
+      const newAmount = prompt("Enter new amount:", oldAmount);
+      if (newAmount === null) return;
+
+      fetch(`/api/auctions/${auctionId}/increments/${incId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ threshold: newThreshold, amount: newAmount })
+      })
+      .then(async res => {
+        const data = await res.json();
+        if (!res.ok) {
+          alert('Error updating increment: ' + (data.error || 'unknown'));
+          return;
+        }
+        renderIncrements(data.increments);
+      })
+      .catch(err => {
+        alert('Network error updating increment.');
+        console.error(err);
+      });
+    }
+
+    function deleteIncrement(incId) {
+      if (!confirm('Are you sure you want to delete this increment?')) return;
+
+      fetch(`/api/auctions/${auctionId}/increments/${incId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(async res => {
+        const data = await res.json();
+        if (!res.ok) {
+          alert('Error deleting increment: ' + (data.error || 'unknown'));
+          return;
+        }
+        renderIncrements(data.increments);
+      })
+      .catch(err => {
+        alert('Network error deleting increment.');
+        console.error(err);
+      });
+    }
+
+    async function exportPlayersDataFn() {
+      try {
+        const res = await fetch(`/api/players?auction_id=${auctionId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          alert(`Error fetching players data (HTTP ${res.status}).`);
+          return;
+        }
+        const players = await res.json();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(players));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "players_data.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+      } catch (err) {
+        alert('Network error fetching players data.');
+        console.error(err);
+      }
+    }
+        
+
+    // CLOSE MODALS WHEN CLICKING OUTSIDE
+    window.onclick = (event) => {
+      if (event.target === createTeamModal) createTeamModal.style.display = 'none';
+      if (event.target === editTeamModal) editTeamModal.style.display = 'none';
+      if (event.target === createPlayerModal) createPlayerModal.style.display = 'none';
+      if (event.target === editPlayerModal) editPlayerModal.style.display = 'none';
+      if (event.target === addIncrementModal) addIncrementModal.style.display = 'none';
+      if (event.target === bulkModal) bulkModal.style.display = 'none';
+    };
+  </script>
+  </div>
+</body>
+</html>

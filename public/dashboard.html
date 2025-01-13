@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Auction Dashboard</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="icon" href="./images/favicon.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    /* Basic styling */
+    body {
+      background-color: #ffffff;
+    }
+
+    #headerStrip {
+        height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: auto;
+        width: 100%;
+        min-width: 800px;
+        padding: 0 calc(50% - 600px);
+        background: url('./images/header-banner.png');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        box-sizing: border-box;
+    }
+    #headerStrip-biddingTeam {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        width: fit-content;
+        max-width: 400px;
+        height: 256px;
+        gap: 16px;
+        position: relative;
+        z-index: 10;
+        margin-left: 64px;
+        overflow: hidden;
+    }
+    #headerStrip-biddingTeam-logo {
+      width: 100px;
+      height: 100px;
+      background: transparent;
+      border-radius: 50%;
+    }
+    #headerStrip-biddingTeam-logo-img {
+      height: 100%;
+      width: 100%;
+      border-radius: 50%;
+    }
+    #headerStrip-biddingTeam-bid {
+      font-size: 48px;
+      font-weight: bold;
+      color: #ffffff
+    }
+    #headerStrip-biddingTeam-name {
+      font-size: 24px;
+      text-transform: uppercase;
+      color: #ffffff
+    }
+    #headerStrip-player {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        min-width: 500px;
+        height: 275px;
+        width: 50%;
+        gap: 16px;
+        background-color: rgba(46, 129, 51, 1);
+        background-image: url('./images/player-card-bg.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        border-radius: 8px;
+        position: relative;
+        z-index: 10;
+        transform-style: preserve-3d;
+        padding: 24px 24px;
+        margin-right: 64px;
+        text-transform: capitalize;
+    }
+    #headerStrip-player::before {
+      content: "";
+      position: absolute;
+      right: 70px;
+      bottom: -50px;
+      background: url("./images/header-shape-2.png") right bottom no-repeat;
+      width: 100px;
+      height: 90px;
+      z-index: -1;
+      transform: translateZ(-1px);
+    }
+    #headerStrip-player::after {
+      content: "";
+      position: absolute;
+      left: -100px;
+      top: -50px;
+      background: url("./images/header-shape-1.png") left top no-repeat;
+      background-size: contain;
+      width: 190px;
+      height: 150px;
+      z-index: -1;
+      transform: translateZ(-1px);
+    }
+    #headerStrip-player-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      width: 100%;
+      height: 100%;
+      gap: 16px;
+      position: relative;
+    }
+    #headerStrip-player-container::before, #headerStrip-player-container::after,
+    #headerStrip-player-unsold, #headerStrip-player-sold {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+    }
+    #headerStrip-player-container::before, #headerStrip-player-unsold {
+      background: rgba(250,250,250,0.8) url("./images/unsold.png") center center no-repeat;
+      background-size: contain;
+      display: none;
+    }
+    #headerStrip-player-container::after, #headerStrip-player-sold {
+      background: rgba(0,0,0,0.5) url("./images/sold.png") center center no-repeat;
+      background-size: contain;
+      display: none;
+    }
+
+    #headerStrip-player-logo {
+      width: 227px;
+      height: 227px;
+      background: transparent;
+      border-radius: 2px;
+    }
+    #headerStrip-player-logo-img {
+      width: 227px;
+    }
+    #headerStrip-player-info, #headerStrip-biddingTeam-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 8px;
+      color: transparent;
+      text-transform: capitalize;
+    }
+    #headerStrip-player-info {
+      justify-content: space-between;
+      height: 100%;
+    }
+    #headerStrip-player-name {
+      font-size: 42px;
+      font-weight: bold;
+      color: #c70072;
+    }
+    #headerStrip-player-stats {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 4px;
+    }
+    .player-stats-row {
+      display: grid;
+      grid-template-columns: repeat(6, min-content);
+      gap: 0px;
+      width: 100%;
+    }
+    .player-stats-row span{
+      padding: 4px 8px;
+    }
+    .player-stats-row span:nth-child(odd) {
+      background-color: #36246e;
+      width: 32px;
+      text-align: center;
+    }
+    .player-stats-row span:nth-child(even) {
+      background-color: #c70072;
+      margin-right: 10px;
+      width: 64px;
+    }
+    #bodyContainer {
+      padding-top: 0px;
+    }
+    #body-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 16px;
+      background-color: #36246e;
+      padding: 10px 24px;
+      border-radius: 0 0 4px 4px;
+      width: max-content;
+      margin: auto;
+      text-transform: uppercase;
+    }
+    #bidding-tools-container {
+      display: grid;
+      grid-template-columns: 536px 1fr;
+      gap: 32px;
+      margin-top: 32px;
+      box-shadow: 2px 2px 4px 4px rgba(0, 0, 0, 0.1), -2px -2px 4px 4px rgba(0, 0, 0, 0.1);
+      padding: 32px;
+    }
+    #sponsors {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 256px auto;
+      grid-row-gap: 24px;
+      grid-column-gap: 24px;
+    }
+    #sponsors div {
+      background-color: #36246e;
+      width: 256px;
+      height: 256px;
+    }
+    #sponsors > div:nth-child(1) {
+      background-color: #ffffff;
+      background-image: url('./images/logo-sponsor-title.jpeg')  ;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    #sponsors > div:nth-child(2) {
+      background-color: #ffffff;
+      background-image: url('./images/logo-tournament.jpeg');
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    #sponsors > div:nth-child(3) {
+      background-color: #ffffff;
+      width: 100%;
+      grid-column: span 2;
+      height: auto;
+    }
+    #sponsors > div:nth-child(3) > img {
+      width: 100%;
+    }
+    #bidding-tools {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      position: relative;
+    }
+    #bidding-tools > div {
+      width: 100%;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;  
+      gap: 16px;
+    }
+    #bidding-tools > div:nth-child(2) {
+      justify-content: center;
+    }
+    /* The button (or div) in top-right to open the popup */
+    #bidding-tools > div.popupTrigger {
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      cursor: pointer;
+      border-radius: 0px;
+      text-align: center;
+      height:32px;
+      width:32px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* The overlay that slightly greys out the #bidding-tools content */
+    #bidding-tools > div.popupOverlay {
+      display: none; /* hidden by default */
+      position: absolute;
+      top: -32px;
+      left: 0;
+      width: calc(100% + 32px);
+      height: calc(100% + 64px);
+      background-color: rgba(0, 0, 0, 0.5); /* semi-transparent grey */
+      justify-content: center;
+      align-items: center; 
+    }
+
+    /* The popup box */
+    #bidding-tools div.popupContainer {
+      background: #fff;
+      width: 328px;
+      padding: 64px 0;
+      position: relative; /* needed to position the close button inside */
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    /* Close button in the top-right corner of the popup */
+    #bidding-tools .popupCloseButton {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background-color: rgba(199, 0, 114, 0);
+      color: #888;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    #bidding-tools .popupCloseButton:hover {
+      color: #000;
+    }
+
+    /* Two flex rows each 32px in height */
+    #bidding-tools .popupRow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 32px;
+      padding-left: 8px; /* so content isn't flush against the edge */
+    }
+
+    #teamBidButtonsDiv, #bidding-tools > div > span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    #teamBidButtonsDiv {
+      margin: auto;
+    }
+    #teamBidButtonsDiv button {
+      height: 64px;
+      word-break: break-word;
+      word-spacing: 100px;
+      font-size: 14px;
+      padding: 4px 8px;
+    }
+
+    #teamBidButtonsDiv .material-icons {
+      font-size: 16px;
+    }
+    
+    #openSummaryPage {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    #currentPlayerDiv, #currentBidDiv {
+      display: none;
+    }
+    #setSelect {
+      width: 100px;
+      height: 32px;
+      border-radius: 2px;
+      padding-left: 8px;
+      outline: none;
+    }
+    button, .button {
+      background-color: #36246e;
+    }
+    #markAllUnsoldBtn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tint {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.0);
+    }
+
+    /* Popup message styling (replaces alerts) */
+    #popupMessage {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #f44336; /* Red-ish background for alert-like styling */
+      color: #fff;
+      padding: 16px;
+      border-radius: 4px;
+      display: none;
+      z-index: 10000;
+      font-family: sans-serif;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <!-- Popup message div for replacing alert(...) -->
+  <div id="popupMessage"></div>
+
+  <header>
+    <div><img src="./images/UCLauctionLogo.png" alt="Logo" /></div>
+    <div><span id="headerUserName">UserName</span></div>
+  </header>
+  <div id="headerStrip">
+        <div id="headerStrip-biddingTeam">
+          <div id="headerStrip-biddingTeam-logo"><img id="headerStrip-biddingTeam-logo-img" src="./images/blank-pixel.png" alt=""/></div>
+          <div id="headerStrip-biddingTeam-info">
+            <span id="headerStrip-biddingTeam-bid"></span>
+            <span id="headerStrip-biddingTeam-name"></span>
+          </div>
+        </div>
+        <div id="headerStrip-player">
+          <div class="tint"></div>
+          <div id="headerStrip-player-container">
+            <div id="headerStrip-player-unsold"></div>
+            <div id="headerStrip-player-sold"></div>
+            <div id="headerStrip-player-logo">
+              <img id="headerStrip-player-logo-img" src="" alt=""/>
+            </div>
+            <div id="headerStrip-player-info">
+              <span id="headerStrip-player-name">Player<br/>Name</span>
+              <span id="headerStrip-player-category">Category</span>
+              <span id="headerStrip-player-stats">Stats...</span>
+            </div>
+          </div>
+        </div>
+  </div>
+  <div id="bodyContainer">
+    <div id="body-title">Real-Time Auction Dashboard</div>
+
+    <div id="bidding-tools-container">
+      <div id="sponsors">
+        <div></div>
+        <div></div>
+        <div><img src="./images/logo-sponsor-strip.jpeg" alt="Sponsor Logo" /></div>
+      </div>
+      <div id="bidding-tools">
+        <!-- Existing content inside #bidding-tools ... -->
+        <div class="adminOnly">
+          <span><button id="nextPlayerBtn" style="zoom: 0.8;"><span class="material-icons">hail</span></button></span>
+          <span><strong>Set:</strong>
+          <select id="setSelect"></select>
+          <button id="selectSetBtn" style="zoom: 0.8;"><span class="material-icons">check</span></button></span>
+        </div>
+        <div>
+          <div id="teamBidButtonsDiv"></div>
+        </div>
+        <div class="adminOnly">
+          <span><button id="undoBidBtn"><span class="material-icons">settings_backup_restore</span></button></span>
+          <span>
+            <button id="markSoldBtn"><span class="material-icons">add_shopping_cart</span></button>
+            <button id="markUnsoldBtn"><span class="material-icons">remove_shopping_cart</span></button>
+          </span>
+        </div>
+        <a id="openSummaryPage" href="./summary.html" target="_blank" class="button"><span class="material-icons">article</span>Summary</a>
+      
+        <!-- Trigger button on top-right corner to open the popup -->
+        <div class="popupTrigger adminOnly" id="popupTrigger"><span class="material-icons">menu</span></div>
+      
+        <!-- Overlay + popup box -->
+        <div class="popupOverlay adminOnly" id="popupOverlay">
+          <div class="popupContainer" id="popupContainer">
+            <button class="popupCloseButton" id="popupCloseButton"><span class="material-icons">close</span></button>
+            <div class="popupRow adminOnly">
+              <button id="markAllUnsoldBtn"><span class="material-icons">currency_exchange</span>Mark All Unsold → Available</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Display current player status (everyone can see) -->
+    <div id="currentPlayerDiv">No player yet.</div>
+    <div id="currentBidDiv">No bid yet.</div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      /********************************************************************
+       * GLOBALS & SETUP
+       ********************************************************************/
+      let currentAuctionId = ''; 
+      let currentPlayerId  = null;
+      let currentPlayer = null;
+
+      // We assume you have user data for role/teamId from localStorage or a /api/me call.
+      // For demonstration:
+      let user = {
+        role: 'guest',    
+        teamId: null      
+      };
+
+      let auctionData = null;
+      let playersData = null;
+      let teamsData = null;
+
+      let token = null;
+
+      const socket = io();
+
+      /********************************************************************
+       * DOM ELEMENTS
+       ********************************************************************/
+      const setSelect          = document.getElementById('setSelect');
+      const selectSetBtn       = document.getElementById('selectSetBtn');
+      const nextPlayerBtn      = document.getElementById('nextPlayerBtn');
+      const markSoldBtn        = document.getElementById('markSoldBtn');
+      const markUnsoldBtn      = document.getElementById('markUnsoldBtn');
+      const markAllUnsoldBtn   = document.getElementById('markAllUnsoldBtn');
+      const undoBidBtn         = document.getElementById('undoBidBtn');
+      const teamBidButtonsDiv  = document.getElementById('teamBidButtonsDiv');
+      const currentPlayerDiv   = document.getElementById('currentPlayerDiv');
+      const currentBidDiv      = document.getElementById('currentBidDiv');
+      const openSummaryPage    = document.getElementById('openSummaryPage');
+
+      const popupTrigger     = document.getElementById('popupTrigger');
+      const popupOverlay     = document.getElementById('popupOverlay');
+      const popupContainer   = document.getElementById('popupContainer');
+      const popupCloseButton = document.getElementById('popupCloseButton');
+
+      // Popup overlay logic
+      popupTrigger.addEventListener('click', (e) => {
+        popupOverlay.style.display = 'flex'; 
+      });
+      popupCloseButton.addEventListener('click', (e) => {
+        popupOverlay.style.display = 'none'; 
+      });
+      popupOverlay.addEventListener('click', (e) => {
+        if (e.target === popupOverlay) {
+          popupOverlay.style.display = 'none';
+        }
+      });
+
+      // Function to show popup messages (replacing alert)
+      function showPopup(message) {
+        const popup = document.getElementById('popupMessage');
+        popup.textContent = message;
+        popup.style.display = 'block';
+        setTimeout(() => {
+          popup.style.display = 'none';
+        }, 3000);
+      }
+
+      /********************************************************************
+       * PAGE LOAD INITIALIZATION
+       ********************************************************************/
+      window.onload = function() {
+        token = localStorage.getItem('auctionToken');
+        if (!token) {
+          window.location.href = 'login.html';
+          return;
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const auctionId = params.get('auctionId');
+        if (!auctionId) {
+          document.body.innerHTML = '<p>No valid Auction selected.</p>';
+          return;
+        }
+        currentAuctionId = auctionId;
+        openSummaryPage.href = `./summary.html?auctionId=${auctionId}`;
+
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        user.role = payload.role;
+        user.teamId = payload.teamId;
+        const headerUserName = document.getElementById('headerUserName');
+        headerUserName.innerText = user.role.replace(/\b\w/g, char => char.toUpperCase());
+
+        // If user is admin, show adminOnly items
+        if (user.role != 'admin') {
+          document.getElementById('openSummaryPage').style.zoom = '2';
+          document.getElementById('openSummaryPage').style.margin = '0';
+          document.getElementById('openSummaryPage').style.background = '#37246e';
+          document.getElementById('openSummaryPage').style.border = '0';
+          const adminEls = document.getElementsByClassName('adminOnly');
+          Array.from(adminEls).forEach((el, i) => {
+              try {
+                  el.parentNode.removeChild(el);
+              } catch(e) {
+                  console.error('Error at iteration', i, e);
+              }
+          });
+        }
+
+        // Load distinct sets for the select dropdown if user role is admin
+        if (user.role === 'admin') {
+          loadDistinctSets();
+        }
+
+        // Load teams (to generate place-bid buttons) if user is admin or team_owner
+        if (user.role === 'admin' || user.role === 'team_owner') {
+          loadTeamsForBidButtons();
+        } else {
+          // If player/guest => no place-bid for teams
+          teamBidButtonsDiv.innerHTML = '<p>You have no bidding privileges.</p>';
+        }
+
+        loadAuctionData();
+        loadPlayersData();
+        loadTeamsData();
+
+        if (!currentPlayer) {
+          document.getElementById('headerStrip-biddingTeam').style.width = '0';
+          document.getElementById('headerStrip-player-container').style.display = 'none';
+          undoBidBtn.disabled = true;
+          markSoldBtn.disabled = true;
+          markUnsoldBtn.disabled = true;
+        }
+      };
+
+      /********************************************************************
+       * LOAD DISTINCT SETS (FOR ADMIN)
+       ********************************************************************/
+      async function loadDistinctSets() {
+        try {
+          const res = await fetch(`/api/players/distinct-sets/${currentAuctionId}`);
+          if (!res.ok) {
+            console.error('Failed to load sets (HTTP ' + res.status + ')');
+            return;
+          }
+          const sets = await res.json();
+          console.log('sets =>', sets);
+
+          setSelect.innerHTML = '';
+          // "All" option
+          const allOpt = document.createElement('option');
+          allOpt.value = 'All';
+          allOpt.textContent = 'All';
+          setSelect.appendChild(allOpt);
+
+          if (sets && sets.length > 0) {
+            sets.forEach(s => {
+              const opt = document.createElement('option');
+              opt.value = s;
+              opt.textContent = s;
+              setSelect.appendChild(opt);
+            });
+          }
+
+          if (user.role === 'admin') {
+            selectSetBtn.click();
+          }
+        } catch(err) {
+          console.error('Error loading distinct sets:', err);
+        }
+      }
+
+      // SELECT SET
+      selectSetBtn.addEventListener('click', () => {
+        const setName = setSelect.value;
+        console.log('Emitting selectSet => ', setName);
+        socket.emit('selectSet', setName);
+      });
+
+      socket.on('setChanged', (data) => {
+        showPopup('Set changed to: ' + data.setName);
+      });
+
+      /********************************************************************
+       * LOAD TEAMS & CREATE MULTIPLE PLACE-BID BUTTONS
+       ********************************************************************/
+      async function loadTeamsForBidButtons() {
+        try {
+          const res = await fetch(`/api/teams?auction_id=${currentAuctionId}`, {
+            headers: {
+              'Authorization': 'Bearer '+token
+            }
+          });
+          if (!res.ok) {
+            console.error('Failed to load teams', res.status);
+            return;
+          }
+          const teams = await res.json();
+          renderTeamBidButtons(teams);
+        } catch(err) {
+          console.error('Error fetching teams for bid:', err);
+        }
+      }
+
+      function renderTeamBidButtons(teams) {
+        let html = '';
+
+        if (user.role === 'admin') {
+          teams.forEach(t => {
+            html += `<button onclick="placeBidForTeam('${t._id}')"><span class="material-icons">groups</span><br/>${t.team_name}</button> `;
+          });
+        } else if (user.role === 'team_owner') {
+          // find the team that matches user.teamId
+          const myTeam = teams.find(t => t._id === user.teamId);
+          if (myTeam) {
+            html += `<button onclick="placeBidForTeam('${myTeam._id}')"><span class="material-icons">groups</span><br/>${myTeam.team_name}</button>`;
+          } else {
+            html += `<p>No matching team found for you.</p>`;
+          }
+        }
+        teamBidButtonsDiv.innerHTML = html;
+
+        // Disable if there's no current player
+        if (!currentPlayer) {
+          document.querySelectorAll('#teamBidButtonsDiv > button').forEach(button => {
+            button.disabled = true;
+          });
+        }
+      }
+
+      window.placeBidForTeam = function(teamId) {
+        if (!currentPlayerId) {
+          showPopup('No current player to bid on.');
+          return;
+        }
+        console.log('placeBidForTeam =>', teamId);
+        socket.emit('placeBid', {
+          auctionId: currentAuctionId,
+          playerId: currentPlayerId,
+          teamId,
+          increment: 10
+        });
+      };
+
+      /********************************************************************
+       * ADMIN-ONLY: NEXT PLAYER, MARK SOLD/UNSOLD, MARK ALL UNSOLD
+       ********************************************************************/
+      nextPlayerBtn.addEventListener('click', () => {
+        if (user.role !== 'admin') return;
+        console.log('Emitting nextPlayer...');
+        socket.emit('nextPlayer');
+      });
+
+      markSoldBtn.addEventListener('click', async () => {
+        if (user.role !== 'admin') return;
+        if (!currentPlayerId) {
+          showPopup('No current player selected.');
+          return;
+        }
+
+        try {
+          const response = await fetch(`/api/players/${currentPlayerId}/last-bid`);
+          if (!response.ok) throw new Error('Failed to fetch last bid');
+          const lastBid = await response.json();
+
+          if (!lastBid) {
+            showPopup('No last bid found for this player');
+            return;
+          }
+
+          const winningTeamId = lastBid.team_id;
+          console.log('marking current player sold =>', currentPlayerId, 'team =>', winningTeamId);
+          socket.emit('markPlayerSold', { playerId: currentPlayerId, teamId: winningTeamId });
+        } catch (err) {
+          console.error('Error fetching last bid:', err);
+          showPopup('Could not fetch the last bid for this player.');
+        }
+      });
+
+      markUnsoldBtn.addEventListener('click', () => {
+        if (user.role !== 'admin') return;
+        if (!currentPlayerId) {
+          showPopup('No current player to mark unsold.');
+          return;
+        }
+        console.log('marking unsold =>', currentPlayerId);
+        socket.emit('markPlayerUnsold', { playerId: currentPlayerId });
+      });
+
+      markAllUnsoldBtn.addEventListener('click', () => {
+        if (user.role !== 'admin') return;
+        console.log('Emitting markAllUnsoldAsAvailable...');
+        socket.emit('markAllUnsoldAsAvailable', { auctionId: currentAuctionId });
+      });
+
+      socket.on('allUnsoldAsAvailableDone', (data) => {
+        console.log('All unsold -> available:', data);
+        showPopup(`${data.modifiedCount} players changed from unsold => available!`);
+      });
+
+      /********************************************************************
+       * PLACE BID / UNDO BID LOGIC
+       ********************************************************************/
+      // If there's a single fallback place-bid button (optional):
+      const placeBidBtn = document.getElementById('placeBidBtn');
+      if (placeBidBtn) {
+        placeBidBtn.addEventListener('click', () => {
+          if (user.role === 'player' || user.role === 'guest') {
+            showPopup('You do not have permissions to place a bid');
+            return;
+          }
+          placeABid();
+        });
+      }
+      function placeABid() {
+        if (!currentPlayerId) {
+          showPopup('No current player selected.');
+          return;
+        }
+        console.log('placeABid => default +10 approach');
+        socket.emit('placeBid', {
+          auctionId: currentAuctionId,
+          playerId: currentPlayerId,
+          teamId: user.teamId || '677d083e08602ca9f3bd2547',
+          increment: 10 
+        });
+      }
+
+      undoBidBtn.addEventListener('click', () => {
+        if (!currentPlayerId) {
+          showPopup('No current player for undo bid.');
+          return;
+        }
+        socket.emit('undoBid', { playerId: currentPlayerId });
+      });
+
+      /********************************************************************
+       * SOCKET EVENTS FOR BIDS / PLAYERS
+       ********************************************************************/
+      socket.on('connect', () => {
+        console.log('Connected as', socket.id);
+      });
+
+      socket.on('currentPlayerChanged', (playerData) => {
+        console.log('currentPlayerChanged =>', playerData);
+        if (!playerData || !playerData._id) {
+          currentPlayerId = null;
+          nextPlayerBtn.disabled = false;
+          currentPlayerDiv.innerHTML = 'No current player.';
+          currentBidDiv.innerHTML = 'No bid.';
+          return;
+        }
+        currentPlayerId = playerData._id;
+        currentPlayer = playerData;
+        nextPlayerBtn.disabled = true;
+        currentPlayerDiv.innerHTML = `Current Player: ${playerData.full_name} (${playerData._id})`;
+        currentBidDiv.innerHTML = `Final Bid: ${playerData.final_bid}`;
+        document.getElementById('headerStrip-player-logo-img').src = playerData.image || "./images/images-player.png";
+        document.getElementById('headerStrip-player-name').innerHTML = playerData.full_name.replace(/\s+/, '<br/>');
+        document.getElementById('headerStrip-player-category').innerHTML = '<b>' + (playerData.category || 'N/A') + '</b>';
+        document.getElementById('headerStrip-player-stats').innerHTML = `
+          <div class="player-stats-row"><span>M</span><span> ${playerData.matches || '-'}</span></div>
+          <div class="player-stats-row">
+            <span>R</span><span> ${playerData.runs || 'N/A'}</span>
+            <span>A</span><span> ${playerData.avg || 'N/A'}</span>
+            <span>Sr</span><span> ${playerData.sr || 'N/A'}</span>
+          </div>
+          <div class="player-stats-row">
+            <span>O</span><span> ${playerData.overs || 'N/A'}</span>
+            <span>W</span><span> ${playerData.wkts || 'N/A'}</span>
+            <span>E</span><span> ${playerData.econ || 'N/A'}</span>
+          </div>
+        `;
+        document.getElementById('headerStrip-player-info').style.color = 'white';
+        document.getElementById('headerStrip-biddingTeam-info').style.color = 'white';
+        document.getElementById('headerStrip-biddingTeam').style.width = '0';
+        document.getElementById('markSoldBtn').disabled = true;
+        document.getElementById('markUnsoldBtn').disabled = false;
+        document.getElementById('undoBidBtn').disabled = true;
+
+        if (!currentPlayer) {
+          document.getElementById('headerStrip-biddingTeam').style.width = '0';
+          document.getElementById('headerStrip-player-container').style.display = 'none';
+        } else {
+          document.getElementById('headerStrip-biddingTeam').style.width = 'fit-content';
+          document.getElementById('headerStrip-player-container').style.display = 'flex';
+          document.querySelectorAll('#teamBidButtonsDiv > button').forEach(button => {
+            button.disabled = false;
+          });
+          markUnsoldBtn.disabled = false;
+          document.getElementById('headerStrip-player-unsold').style.display = 'none';
+          document.getElementById('headerStrip-player-sold').style.display = 'none';
+        }
+        loadLatestBid();
+      });
+
+      socket.on('bidUpdated', async (data) => {
+        console.log('bidUpdated =>', data);
+
+        if (data.final_bid && data.teamId) {
+          try {
+            const response = await fetch(`/api/teams/${data.teamId}`, {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            if (!response.ok) throw new Error('Failed to fetch team data');
+            const currentTeam = await response.json();
+            if (currentPlayerId === data.playerId) {
+              currentBidDiv.innerHTML = `Last Bid: ${data.final_bid} by ${currentTeam.team_name}`;
+              document.getElementById('headerStrip-biddingTeam-logo-img').src = currentTeam.image ||"./images/images-team.jpg";
+              document.getElementById('headerStrip-biddingTeam-bid').innerHTML = `$${data.final_bid}`;
+              document.getElementById('headerStrip-biddingTeam-name').innerHTML = currentTeam.team_name;
+              document.getElementById('headerStrip-biddingTeam').style.width = 'fit-content';
+              document.getElementById('markSoldBtn').disabled = false;
+              document.getElementById('markUnsoldBtn').disabled = true;
+              document.getElementById('undoBidBtn').disabled = false;
+            }
+          } catch (err) {
+            console.error('Error fetching team data:', err);
+            showPopup('Could not fetch the data for this team.');
+          }
+        } else {
+          document.getElementById('headerStrip-biddingTeam').style.width = '0';
+          document.getElementById('markSoldBtn').disabled = true;
+          document.getElementById('markUnsoldBtn').disabled = false;
+          document.getElementById('undoBidBtn').disabled = true;
+        }
+      });
+
+      // “playerSold” event
+      socket.on('playerSold', (data) => {
+        console.log('playerSold =>', data);
+        if (data.playerId === currentPlayerId) {
+          currentPlayerId = null;
+          currentPlayerDiv.innerHTML = 'No current player.';
+          currentBidDiv.innerHTML = 'No bid.';
+          nextPlayerBtn.disabled = false;
+          document.querySelectorAll('#teamBidButtonsDiv > button').forEach(button => {
+            button.disabled = true;
+          });
+          markUnsoldBtn.disabled = true;
+          markSoldBtn.disabled = true;
+          undoBidBtn.disabled = true;
+          document.getElementById('headerStrip-player-sold').style.display = 'block';
+        }
+      });
+
+      // “playerUnsold” event
+      socket.on('playerUnsold', (data) => {
+        console.log('playerUnsold =>', data);
+        if (data.playerId === currentPlayerId) {
+          currentPlayerId = null;
+          currentPlayerDiv.innerHTML = 'No current player.';
+          currentBidDiv.innerHTML = 'No bid.';
+          nextPlayerBtn.disabled = false;
+          document.querySelectorAll('#teamBidButtonsDiv > button').forEach(button => {
+            button.disabled = true;
+          });
+          markUnsoldBtn.disabled = true;
+          markSoldBtn.disabled = true;
+          undoBidBtn.disabled = true;
+          document.getElementById('headerStrip-player-unsold').style.display = 'block';
+        }
+      });
+
+      socket.on('disconnect', () => {
+        console.log('Disconnected from server.');
+      });
+
+      /********************************************************************
+       * LOAD AUCTION DATA
+       ********************************************************************/
+      async function loadAuctionData() {
+        try {
+          const res = await fetch(`/api/auctions/${currentAuctionId}`, {
+            headers: {
+              'Authorization': 'Bearer ' + token
+            }
+          });
+          if (!res.ok) {
+            console.error('Failed to load auction data (HTTP ' + res.status + ')');
+            return;
+          }
+          auctionData = await res.json();
+          document.getElementById('body-title').innerHTML = auctionData.name;
+          console.log('Auction data loaded:', auctionData);
+        } catch (err) {
+          console.error('Error fetching auction data:', err);
+        }
+      }
+
+      /********************************************************************
+       * LOAD PLAYERS DATA
+       ********************************************************************/
+      async function loadPlayersData() {
+        try {
+          const res = await fetch(`/api/players?auction_id=${currentAuctionId}`, {
+            headers: {
+              'Authorization': 'Bearer ' + token
+            }
+          });
+          if (!res.ok) {
+            console.error('Failed to load players data (HTTP ' + res.status + ')');
+            return;
+          }
+          playersData = await res.json();
+          console.log('Players data loaded:', playersData);
+        } catch (err) {
+          console.error('Error fetching players data:', err);
+        }
+      }
+
+      /********************************************************************
+       * LOAD TEAMS DATA
+       ********************************************************************/
+      async function loadTeamsData() {
+        try {
+          const res = await fetch(`/api/teams?auction_id=${currentAuctionId}`, {
+            headers: {
+              'Authorization': 'Bearer ' + token
+            }
+          });
+          if (!res.ok) {
+            console.error('Failed to load teams data (HTTP ' + res.status + ')');
+            return;
+          }
+          teamsData = await res.json();
+          console.log('Teams data loaded:', teamsData);
+        } catch (err) {
+          console.error('Error fetching teams data:', err);
+        }
+      }
+
+      /********************************************************************
+       * LOAD LATEST BID (if currentPlayerId is set)
+       ********************************************************************/
+      async function loadLatestBid() {
+        try {
+          const response = await fetch(`/api/players/${currentPlayerId}/last-bid`, {
+            headers: {
+              'Authorization': 'Bearer ' + token
+            }
+          });
+          if (!response.ok) throw new Error('Failed to fetch last bid');
+          const lastBid = await response.json();
+
+          if (!lastBid) {
+            currentBidDiv.innerHTML = 'No bid.';
+            console.log('No last bid found for this player');
+            return;
+          } 
+          console.log('Last bid found for this player', lastBid);
+
+          const teamResponse = await fetch(`/api/teams/${lastBid.team_id}`, {
+            headers: {
+              'Authorization': 'Bearer ' + token
+            }
+          });
+          if (!teamResponse.ok) throw new Error('Failed to fetch team data');
+          const bidTeam = await teamResponse.json();
+
+          currentBidDiv.innerHTML = `Last Bid: ${lastBid.final_bid} by ${bidTeam.team_name}`;
+          document.getElementById('headerStrip-biddingTeam-logo-img').src = bidTeam.image || './images/images-team.jpg';
+          document.getElementById('headerStrip-biddingTeam-bid').innerHTML = `$${lastBid.amount}`;
+          document.getElementById('headerStrip-biddingTeam-name').innerHTML = bidTeam.team_name;
+          document.getElementById('headerStrip-biddingTeam').style.width = 'fit-content';
+
+          markSoldBtn.disabled = false;
+          markUnsoldBtn.disabled = true;
+          undoBidBtn.disabled = false;
+
+        } catch (err) {
+          console.error('Error loading last bid:', err);
+        }
+      }
+    </script>
+  </div>
+</body>
+</html>

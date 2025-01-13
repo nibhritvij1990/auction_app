@@ -1,0 +1,422 @@
+<!-- public/summary.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Auction Summary</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <link rel="icon" href="./images/favicon.png" type="image/x-icon">
+  <style>
+    .tab-buttons button {
+      margin-right: 10px;
+    }
+    .hidden {
+      display: none;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 10px;
+      background-color: #ffffff;
+    }
+    th, td {
+      padding: 8px;
+    }
+    th {
+      background-color: #c70072;
+      color: white;
+    }
+    h3 {
+        display: inline-block;
+    }
+    .team-matrix{
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 16px;
+        justify-content: space-between;
+    }
+    .team-matrix table {
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 20px;
+    margin-top: 20px; /* So there's spacing below the first table */
+    border: 1px solid #c70072;
+    width: max-content;
+    height: max-content;
+  }
+  .team-matrix th {
+    background-color: #c70072;
+  }
+  #headerStrip {
+        height: 256px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: auto;
+        width: 100%;
+        min-width: 600px;
+        padding: 0 calc(50% - 600px);
+        background: #4c3b9b;
+        color: white;
+        box-sizing: border-box;
+    }
+    #headerStripLeft {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: fit-content;
+        gap: 16px;
+    }
+    #headerStripLeft > img {
+        width: 180px;
+        height: 180px;
+        background-color: #ffffff;
+    }
+    #headerStripMiddle {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        width: fit-content;
+        flex-direction: column;
+    }
+    #teamsTable, #playersView table {
+        border: 1px solid #c70072;
+        background-color: #ffffff;
+    }
+    #teamsTable tr {
+        display: grid;
+        grid-template-columns: 2.5fr repeat(4, 1fr);
+        text-align: left;
+        background-color: #ffffff;
+    }
+    #teamsTable td, #teamsTable th {
+        border: 0;
+    }
+    #playersView table {
+        width: 100%;
+        margin: 16px 0;
+    }
+    #playersView table tr {
+        display: grid;
+        grid-template-columns: 3fr 1fr 1fr 1fr;
+        text-align: left;
+        background-color: #ffffff;
+    }
+   #playersView table:not(#soldTable) tr {
+        grid-template-columns: 2fr 1fr;
+   }
+    #playersView table td, #playersView table th {
+        border: 0;
+    }
+    #secondaryPlayersTables {
+        width: auto;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 16px;
+        justify-content: space-between;
+        margin-top: 32px;
+    }
+    #secondaryPlayersTables > div {
+        width: 48%;
+    }
+  </style>
+</head>
+<body>
+    <header>
+        <div><img src="./images/UCLauctionLogo.png" alt="Logo" /></div>
+        <div><span id="headerUserName">UserName</span></div>
+    </header>
+    <div id="headerStrip">
+          <div id="headerStripLeft">
+            <img src="" alt="Logo" id="auctionLogo" />
+            <div id="headerStripMiddle">
+                <h1 id="headerStripAuctionName">Auction Summary</h1>
+                <div class="tab-buttons">
+                    <button id="teamsViewBtn">Teams</button>
+                    <button id="playersViewBtn">Players</button>
+                </div>
+            </div>
+          </div>
+          <div id="dummyBox"></div>
+    </div>
+    <div id="bodyContainer">
+
+  <!-- Players View -->
+  <div id="playersView" class="hidden">
+    <h2>Players</h2>
+    <!-- We can show Sold, Unsold, and Available players in separate sections or combined -->
+    <h3>Sold Players</h3>
+    <table id="soldTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Final Bid</th>
+          <th>Sold To</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div id="secondaryPlayersTables">
+        <div>
+    <h3>Unsold Players</h3>
+    <table id="unsoldTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+</div><div>
+    <h3>Available Players</h3>
+    <table id="availableTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+  <!-- Teams View -->
+  <div id="teamsView" class="">
+    <h2>Teams</h2>
+    <table id="teamsTable">
+      <thead>
+        <tr>
+          <th>Team Name</th>
+          <th>Current Purse</th>
+          <th>Total Spent</th>
+          <th>Current Players</th>
+          <th>Max Players</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div id="teamsPlayersMatrix" class="team-matrix"></div>
+  </div>
+    
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const auctionId = params.get('auctionId');
+    const token = localStorage.getItem('auctionToken');
+
+
+
+    const playersViewBtn = document.getElementById('playersViewBtn');
+    const teamsViewBtn = document.getElementById('teamsViewBtn');
+    const playersViewDiv = document.getElementById('playersView');
+    const teamsViewDiv = document.getElementById('teamsView');
+
+    const soldTable = document.getElementById('soldTable').querySelector('tbody');
+    const unsoldTable = document.getElementById('unsoldTable').querySelector('tbody');
+    const availableTable = document.getElementById('availableTable').querySelector('tbody');
+    const teamsTable = document.getElementById('teamsTable').querySelector('tbody');
+
+    // Switch between Players and Teams view
+    playersViewBtn.addEventListener('click', () => {
+      playersViewDiv.classList.remove('hidden');
+      teamsViewDiv.classList.add('hidden');
+    });
+    teamsViewBtn.addEventListener('click', () => {
+      teamsViewDiv.classList.remove('hidden');
+      playersViewDiv.classList.add('hidden');
+    });
+
+    // On load, fetch summary data
+    window.onload = async function() {
+
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userRole = payload.role;
+        const userTeamId = payload.teamId;
+        
+        const headerUserName = document.getElementById('headerUserName');
+        headerUserName.innerText = userRole.replace(/\b\w/g, char => char.toUpperCase());
+      
+      if (!auctionId) {
+        document.body.innerHTML = '<p>No valid Auction selected.</p>';
+        return;
+      }
+      if (!token) {
+        document.body.innerHTML = '<p>Please log in (missing token).</p>';
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/auctions/${auctionId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          tabContentDiv.innerHTML = `<p>Error loading Auction (HTTP ${res.status}).</p>`;
+          return;
+        }
+        const auction = await res.json();
+        const auctionLogoUrl = document.getElementById('auctionLogo');
+        auctionLogoUrl.src = auction.image_url || "images/logo-auction-default.png" ;
+        document.getElementById('headerStripAuctionName').textContent = "Summary for " + auction.name;
+      } catch (err) {
+        tabContentDiv.innerHTML = '<p>Network error loading Auctions.</p>';
+      }
+
+      try {
+        const res = await fetch(`/api/auctions/${auctionId}/summary`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || 'Failed to load summary');
+        }
+        const summary = await res.json();
+
+        // Fill the “Players” tables
+        renderPlayers(summary?.soldPlayers || [], soldTable, true);
+        renderPlayers(summary?.unsoldPlayers || [], unsoldTable, false);
+        renderPlayers(summary?.availablePlayers || [], availableTable, false);
+
+        // Fill the “Teams” table
+        renderTeams(summary?.teamSummaries || []);
+        renderTeamPlayerMatrix(summary?.soldPlayers || []);
+      } catch(err) {
+        document.body.innerHTML = `<p>Error loading summary: ${err.message}</p>`;
+      }
+    };
+
+    function renderPlayers(playersArr, tableBody, showFinalBid) {
+      tableBody.innerHTML = '';
+      playersArr.forEach(player => {
+        const tr = document.createElement('tr');
+        const nameTd = document.createElement('td');
+        const categoryTd = document.createElement('td');
+        nameTd.textContent = player.name;
+        categoryTd.textContent = player.category;
+        tr.appendChild(nameTd);
+        tr.appendChild(categoryTd);
+
+        
+
+        // For sold players we might show a “Sold To” column
+        if (player.sold_to_team) {
+
+            // Decide if we show final bid or base price
+        const secondTd = document.createElement('td');
+        const secondTdValue = showFinalBid
+          ? (player.final_bid !== null && player.final_bid !== undefined
+             ? player.final_bid : 'N/A')
+          : (player.base_price || 'N/A');
+        secondTd.textContent = secondTdValue;
+        tr.appendChild(secondTd);
+
+          const soldToTd = document.createElement('td');
+          soldToTd.textContent = player.sold_to_team;
+          tr.appendChild(soldToTd);
+        }
+        tableBody.appendChild(tr);
+      });
+    }
+
+    function renderTeams(teamArr) {
+      teamsTable.innerHTML = '';
+      teamArr.forEach(team => {
+        const tr = document.createElement('tr');
+        
+        const nameTd = document.createElement('td');
+        nameTd.textContent = team.team_name || 'Unnamed';
+        tr.appendChild(nameTd);
+
+        const purseTd = document.createElement('td');
+        purseTd.textContent = team.current_purse;
+        tr.appendChild(purseTd);
+
+        const spentTd = document.createElement('td');
+        spentTd.textContent = team.total_spent || 0;
+        tr.appendChild(spentTd);
+
+        const currentPlayersTd = document.createElement('td');
+        currentPlayersTd.textContent = team.current_players;
+        tr.appendChild(currentPlayersTd);
+
+        const maxPlayersTd = document.createElement('td');
+        maxPlayersTd.textContent = team.max_players;
+        tr.appendChild(maxPlayersTd);
+
+        teamsTable.appendChild(tr);
+      });
+    }
+
+    function renderTeamPlayerMatrix(soldPlayersArr) {
+        // 1. Build a map of teams keyed by team name (or placeholder if none) 
+        //    and accumulate their purchased players in an array.
+        const teamsMap = {};
+
+        soldPlayersArr.forEach(player => {
+            // If there's no sold_to_team, default to "No Team Assigned" or your chosen placeholder
+            const teamName = player.sold_to_team || "No Team Assigned";
+
+            if(!teamsMap[teamName]) {
+                teamsMap[teamName] = {
+                    team_name: teamName,
+                    players: []
+                };
+            }
+            teamsMap[teamName].players.push(player);
+        });
+
+        // 2. Convert the map into an array we can iterate over
+        const teamArr = Object.values(teamsMap);
+
+        // 3. Create or select the container where we'll render the tables
+        const matrixDiv = document.getElementById('teamsPlayersMatrix');
+        matrixDiv.innerHTML = ''; // Clear if re-rendering
+
+        // 4. Loop over each team to build the table
+        teamArr.forEach(team => {
+            const table = document.createElement('table');
+
+            // Table header row with the team's name
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            const headerTh = document.createElement('th');
+            headerTh.colSpan = 1;
+            headerTh.textContent = team.team_name;
+            headerRow.appendChild(headerTh);
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // Table body with each purchased player in a separate row
+            const tbody = document.createElement('tbody');
+            const players = team.players || [];
+            players.forEach(player => {
+                const row = document.createElement('tr');
+                const playerTd = document.createElement('td');
+                playerTd.textContent = player.name;
+                row.appendChild(playerTd);
+                tbody.appendChild(row);
+            });
+
+            // If no players (empty array), show a placeholder row
+            if (players.length === 0) {
+                const row = document.createElement('tr');
+                const noPlayersTd = document.createElement('td');
+                noPlayersTd.textContent = '(No players purchased)';
+                row.appendChild(noPlayersTd);
+                tbody.appendChild(row);
+            }
+
+            table.appendChild(tbody);
+            matrixDiv.appendChild(table);
+        });
+    }
+  </script>
+</body>
+</html>

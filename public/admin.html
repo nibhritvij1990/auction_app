@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" />
+  <link rel="icon" href="./images/favicon.png" type="image/x-icon">
+  <style>
+    /* A quick modal style (very basic) */
+    #auctionModal {
+      display: none; 
+      position: fixed; 
+      z-index: 999; 
+      left: 0; 
+      top: 0; 
+      width: 100%; 
+      height: 100%; 
+      overflow: auto; 
+      background-color: rgba(0,0,0,0.4); 
+    }
+    #auctionModalContent {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      width: 400px;
+      border-radius: 5px;
+    }
+    .closeModal {
+      float: right;
+      cursor: pointer;
+      color: #aaa;
+      font-weight: bold;
+    }
+    .closeModal:hover {
+      color: #000;
+    }
+    .adminOnly {
+        display: inline-block;
+    }
+
+    #pageTitle {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+    #auctions-list {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+    }
+    #auctions-list button {
+        font-size: 9px;
+    }
+    #auctions-list > div {
+        width: 480px;
+        background-color: #ffffff;
+        border: 1px solid #cccccc;
+        border-radius: 4px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        box-sizing: border-box;
+        padding: 8px;
+        position: relative;
+    }
+    #auctions-list > div > div > img {
+        width: 150px;
+        height: 150px;
+    }
+
+    #auctions-list > div > div > p {
+        margin: 6px 0;
+        font-size: 14px;
+    }
+    #auctions-list > div > div > h3 {
+        font-size: 16px;
+    }
+    #controlButtons {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+        position: absolute;
+        right: 8px;
+        bottom: 8px;
+    }
+    #createAuctionBtn{
+        font-size: 20px !important;
+        padding: 4px;
+        font-family: "Material Icons" !important;
+        background-color: rgb(55, 36, 110);
+    }
+    #createAuctionBtn {
+        zoom: 1.25;
+    }
+  </style>
+<link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <header>
+        <div><img src="./images/UCLauctionLogo.png" alt="Logo" /></div>
+        <div><span id="headerUserName">UserName</span></div>
+    </header>
+    <div id="bodyContainer">
+  <span id="pageTitle"><h1>Auction Dashboard</h1>
+  <span><button id="createAuctionBtn" class="adminOnly"><span class="tooltip">Create Auction</span><span class="material-icons-outlined">library_add</span></button></span></span>
+  <p id="statusMsg"></p>
+
+  <!-- Where we display the list of auctions -->
+  <div id="auctions-list"></div>
+
+  <!-- Modal for Creating/Editing an Auction -->
+  <div id="auctionModal">
+    <div id="auctionModalContent">
+      <span class="closeModal" id="closeModalBtn">&times;</span>
+      <h3 id="modalTitle">Create Auction</h3>
+      <!-- PART OF THE MODAL FORM -->
+<form id="auctionForm" encType="multipart/form-data">
+    <input type="hidden" id="auctionId" name="auctionId" />
+    
+    <div>
+      <label>Name: </label>
+      <input type="text" id="auctionName" name="name" />
+    </div>
+  
+    <!-- Either “logo_url” or “logo_file” -->
+    <div>
+      <label>Logo URL (optional): </label>
+      <input type="text" id="auctionLogoUrl" name="logo_url" />
+    </div>
+  
+    <div>
+      <label>Upload Logo (optional): </label>
+      <input type="file" id="auctionLogoFile" name="logo_file" accept="image/*" />
+    </div>
+  
+    <div>
+      <label>Date: </label>
+      <input type="date" id="auctionDate" name="date" />
+    </div>
+  
+    <div>
+      <label>Max Players Per Team: </label>
+      <input type="number" id="auctionMaxPlayers" name="max_players_per_team" value="15" />
+    </div>
+  
+    <div>
+      <label>Base Budget (Team Purse): </label>
+      <input type="number" id="auctionBaseBudget" name="base_budget" value="2500" />
+    </div>
+  
+    <div>
+      <label>Base Price (for Players): </label>
+      <input type="number" id="auctionBasePrice" name="base_price" value="20" />
+    </div>
+  
+    <button type="submit" id="saveAuctionBtn">Save</button>
+  </form>
+    </div>
+  </div>
+    </div>
+
+  <script>
+    const token = localStorage.getItem('auctionToken'); // token from login
+    if (!token) {
+        window.location.href = 'login.html';
+    }
+
+    const headerUserName = document.getElementById('headerUserName');
+    const tokenpayload = JSON.parse(atob(token.split('.')[1]));
+    const userName = tokenpayload.role;
+    headerUserName.innerText = userName.replace(/\b\w/g, char => char.toUpperCase());
+
+    const auctionsListDiv = document.getElementById('auctions-list');
+    const statusMsg = document.getElementById('statusMsg');
+
+    // Modal elements
+    const auctionModal = document.getElementById('auctionModal');
+    const auctionModalContent = document.getElementById('auctionModalContent'); 
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const auctionForm = document.getElementById('auctionForm');
+    const modalTitle = document.getElementById('modalTitle');
+
+    // Form fields
+    const auctionIdField = document.getElementById('auctionId');
+    const auctionNameField = document.getElementById('auctionName');
+    const auctionLogoField = document.getElementById('auctionLogoUrl');
+    const auctionLogoFileField = document.getElementById('auctionLogoFile');
+    const auctionDateField = document.getElementById('auctionDate');
+    const auctionMaxPlayersField = document.getElementById('auctionMaxPlayers');
+    const auctionBaseBudgetField = document.getElementById('auctionBaseBudget');
+    const auctionBasePriceField = document.getElementById('auctionBasePrice');
+
+    // Open modal to create a new auction
+    document.getElementById('createAuctionBtn').addEventListener('click', () => {
+      openCreateAuctionModal();
+    });
+
+    function openCreateAuctionModal() {
+      modalTitle.innerText = 'Create Auction';
+      auctionIdField.value = '';
+      auctionNameField.value = '';
+      auctionLogoField.value = '';
+      auctionLogoFileField.value = '';
+      auctionDateField.value = '';
+      auctionMaxPlayersField.value = '15';
+      auctionBaseBudgetField.value = '2500';
+      auctionBasePriceField.value = '20';
+
+      // Show the modal
+      auctionModal.style.display = 'block';
+    }
+
+    // Close modal
+    closeModalBtn.addEventListener('click', () => {
+      auctionModal.style.display = 'none';
+    });
+
+    // When user clicks outside modal content, hide it
+    window.onclick = (event) => {
+      if (event.target === auctionModal) {
+        auctionModal.style.display = 'none';
+      }
+    };
+
+    // Auction form submission (create or update)
+    auctionForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!token) {
+        alert('No token found, please log in.');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const auctionId = auctionIdField.value; // hidden input to know if we are editing or creating
+
+  // Build FormData from the form
+  const formData = new FormData(auctionForm);
+
+  // Note: formData now contains:
+  // - name
+  // - logo_url
+  // - logo_file (if user selected a file)
+  // - date
+  // - max_players_per_team
+  // - base_budget
+  // - base_price
+  // - etc.
+
+  // Decide method/endpoints
+  const method = auctionId ? 'PUT' : 'POST';
+  const url = auctionId ? `/api/auctions/${auctionId}` : '/api/auctions';
+
+    try {
+        const response = await fetch(url, {
+        method,
+        headers: {
+            // We do NOT add 'Content-Type': 'application/json' here!
+            // fetch automatically sets the correct multipart boundary if body is FormData.
+            'Authorization': `Bearer ${token}`
+        },
+        body: formData
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+        statusMsg.innerText = 'Error: ' + (data.error || 'Failed');
+        } else {
+        statusMsg.innerText = auctionId ? 'Auction updated!' : 'Auction created!';
+        setTimeout(() => {
+          statusMsg.innerText = '';
+        }, 3000);
+        auctionModal.style.display = 'none';
+        loadAuctions(); // refresh list
+        }
+    } catch (err) {
+        statusMsg.innerText = 'Network or server error.';
+    }
+    });
+
+    // Load existing auctions on page load
+    async function loadAuctions() {
+      if (!token) {
+        auctionsListDiv.innerHTML = '<p>You are not logged in.</p>';
+        return;
+      }
+      try {
+        const res = await fetch('/api/auctions', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache'
+        },
+        cache: 'no-store' // or 'reload'
+        });
+        const auctions = await res.json();
+        if (!res.ok) {
+          auctionsListDiv.innerHTML = '<p>Error loading auctions.</p>';
+          return;
+        }
+        // Build the HTML for each auction
+        renderAuctions(auctions);
+      } catch (err) {
+        auctionsListDiv.innerHTML = '<p>Network error, unable to load auctions.</p>';
+      }
+    }
+
+    function renderAuctions(auctions) {
+      if (!Array.isArray(auctions)) {
+        auctionsListDiv.innerHTML = '<p>No auctions found or invalid format.</p>';
+        return;
+      }
+      if (auctions.length === 0) {
+        auctionsListDiv.innerHTML = '<p>No auctions yet. Create one!</p>';
+        return;
+      }
+
+      const html = auctions.map(a => {
+        return `
+          <div>
+            <div><img src="${a.image_url}" alt="Logo"></div>
+            <div>
+                <h3>${a.name}</h3>
+                <p>Date: ${a.date ? a.date.substring(0,10) : 'N/A'}</p>
+                <p>Status: ${a.status}</p>
+                <p>Team Purse: ${a.base_budget}</p>
+                <p>Base Price: ${a.base_price}</p>
+                <div id="controlButtons">
+                    <button class="controlBtns adminOnly" onclick="editAuction('${a._id}')"><span class="material-icons">edit</span></button>
+                    <button class="controlBtns adminOnly" onclick="manageAuction('${a._id}')"><span class="material-icons">settings</span></button>
+                    <button class="controlBtns" onclick="openDashboard('${a._id}')"><span class="material-icons">monitor</span></button>
+                    <button class="controlBtns adminOnly delete-btn" onclick="deleteAuction('${a._id}')"><span class="material-icons">delete</span></button>
+                </div>
+            </div>
+            <!-- We can also add "Add Bid Increments" or "Add Teams" buttons here later -->
+          </div>
+        `;
+      }).join('');
+      auctionsListDiv.innerHTML = html;
+      if (userName != "admin") {
+        let adminEls = document.getElementsByClassName('adminOnly');
+        Array.from(adminEls).forEach((el, i) => {
+            try {
+                //el.style.display = 'none';
+                el.parentNode.removeChild(el);
+            } catch(e) {
+                console.error('Error at iteration', i, e);
+            }
+        });
+    }
+    }
+
+    // Edit an existing auction
+    window.editAuction = async function(auctionId) {
+      // fetch the existing data, fill the form, open modal
+      try {
+        const res = await fetch(`/api/auctions/${auctionId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const auction = await res.json();
+        if (!res.ok) {
+          statusMsg.innerText = 'Failed to load auction for edit.';
+          return;
+        }
+
+        modalTitle.innerText = 'Edit Auction';
+        auctionIdField.value = auction._id;
+        auctionNameField.value = auction.name || '';
+        auctionLogoField.value = auction.image_url || '';
+        auctionDateField.value = auction.date ? auction.date.substring(0,10) : '';
+        auctionMaxPlayersField.value = auction.max_players_per_team || '15';
+        auctionBaseBudgetField.value = auction.base_budget || '2500';
+        auctionBasePriceField.value = auction.base_price || '20';
+
+        // Show modal
+        auctionModal.style.display = 'block';
+
+      } catch (err) {
+        statusMsg.innerText = 'Error fetching auction info.';
+      }
+    };
+
+    // Delete an auction
+    window.deleteAuction = async function(auctionId) {
+      if (!confirm('Are you sure you want to delete this auction?')) return;
+
+      try {
+        const res = await fetch(`/api/auctions/${auctionId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          statusMsg.innerText = 'Failed to delete auction: ' + (data.error || '');
+        } else {
+          statusMsg.innerText = 'Auction deleted successfully.';
+          loadAuctions(); 
+        }
+      } catch (err) {
+        statusMsg.innerText = 'Network or server error while deleting.';
+      }
+    };
+
+    window.manageAuction = function(auctionId) {
+    // Navigates to auction.html, passing the ID in the query param
+    window.location.href = `auction.html?auctionId=${auctionId}`;
+    };
+
+    window.openDashboard = function(auctionId) {
+    // open in a new tab
+    window.open(`dashboard.html?auctionId=${auctionId}`, '_blank');
+    }
+
+    // finally, load auctions when page loads
+    loadAuctions();
+    
+    
+
+  </script>
+</body>
+</html>

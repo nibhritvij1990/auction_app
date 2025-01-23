@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Auction Ticker</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="icon" href="./images/favicon.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    /* Basic styling */
+    html, body {
+      background-color: rgba(0, 177, 64, 0);
+    }
+    #ticker-content {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #ffffff;
+      padding: 2rem;
+      width: 67.5rem;
+      height: 30rem;
+      display: grid;
+      grid-template-columns: repeat(3, 22.5rem);
+      grid-template-rows: 18rem 8rem 4rem;
+      box-sizing: content-box;
+    }
+    .cell {
+      border: 1px solid red;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0,0,0,0.8);
+      border: 1px solid red;
+      flex-wrap: wrap;
+    }
+    .space-filler {
+        background-color: transparent;
+        border: 0;
+    }
+    #headerStrip-player-logo {
+        border: none;
+        position: relative;
+        background-color: transparent;
+    }
+    #headerStrip-player-unsold, #headerStrip-player-sold {
+        width: 100%;
+        height: 100%;
+        border: none;
+        position: absolute;
+        top: 0rem;
+        left: 0;
+        bottom: 0rem;
+        right: 0;
+        z-index: 1000;
+        display: none;
+        border-radius: 50% 50% 0% 0%;
+    }
+    #headerStrip-player-sold {
+        background: rgba(0,0,0,0.5) url("./images/sold.png") center 7rem no-repeat;
+        background-size: 100%;
+    }
+    #headerStrip-player-unsold {
+        background: rgba(250,250,250,0.8) url("./images/unsold.png") center 7rem no-repeat;
+        background-size: 100%;
+    }
+    #headerStrip-player-logo-img {
+        width: 22.5rem;
+        height: 22.5rem;
+        border: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        border-radius: 50% 50% 10% 10%;
+    }
+    .cell > span[id^="headerStrip"] {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #headerStrip-player-name-cell {
+        font-size: 3rem;
+        height: 100%;
+        text-align: center;
+        transform: perspective(9px) rotateX(-1deg) translateY(0.5rem);
+        background: rgba(0,0,0,0.75);
+    }
+    #headerStrip-player-name {
+        transform: perspective(9px) rotateX(1deg) translateY(-0.5rem);
+    }
+    #headerStrip-biddingTeam-name-body {
+        height: 5rem;
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+    }
+    #headerStrip-biddingTeam-name {
+        font-size: 3.5rem;
+        text-align: left;
+    }
+    #headerStrip-biddingTeam-bid {
+        font-size: 1.25rem;
+        text-align: left;
+    }
+    #headerStrip-player-category-cell {
+        transform: skew(20deg);
+    }
+    #headerStrip-player-category {
+        font-size: 2rem;
+        height: 5rem;
+        transform: skew(-20deg);
+        text-transform: uppercase;
+    }
+    #headerStrip-biddingTeam-cell {
+        transform: skew(-20deg);
+    }
+    #headerStrip-biddingTeam-cell > span{
+        transform: skew(20deg);
+        text-transform: uppercase;
+    }
+    #headerStrip-biddingTeam-name-title {
+        font-size: 1.5rem;
+        height: 3rem;
+        transform: skew(20deg);
+        text-transform: uppercase;
+    }
+    #headerStrip-player-category-title {
+        font-size: 1.5rem;
+        height: 3rem;
+        transform: skew(-20deg);
+        text-transform: uppercase;
+    }
+    #headerStrip-player-stats {
+        font-size: 1.25rem;
+        margin: 0 2.33rem;
+        transform: perspective(20px) rotateX(-1deg);
+        grid-column: span 3;
+        display: flex;
+        flex-direction: row;
+        gap: 0rem;
+    }
+    #headerStrip-player-stats-content {
+        transform: perspective(20px) rotateX(1deg);
+        display: flex;
+        flex-direction: row;
+        gap: 0rem;
+    }
+    #headerStrip-player-stats-content span {
+      text-align: center;
+      transform: perspective(20px) rotateX(1deg);
+    }
+    #headerStrip-player-stats-content span:nth-child(odd) {
+      background-color: #36246e;
+      width: 2.5rem;
+      margin-left: 0.5rem;
+    }
+    #headerStrip-player-stats-content span:nth-child(even) {
+      background-color: #c70072;
+      width: 5rem;
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="ticker">
+    <div id="ticker-content">
+        <div class="cell space-filler"></div>
+        <div class="cell" id="headerStrip-player-logo">
+            <div id="headerStrip-player-unsold"></div>
+            <div id="headerStrip-player-sold"></div>
+            <img id="headerStrip-player-logo-img" src="./images/images-player.png" alt=""/>
+        </div>
+        <div class="cell space-filler"></div>
+        <div class="cell" id="headerStrip-player-category-cell">
+            <span id="headerStrip-player-category-title">Playing Role</span>
+            <span id="headerStrip-player-category">a</span>
+        </div>
+        <div class="cell" id="headerStrip-player-name-cell">
+            <span id="headerStrip-player-name">Player<br/>Name</span>
+        </div>
+        <div class="cell" id="headerStrip-biddingTeam-cell">
+            <span id="headerStrip-biddingTeam-name-title">Current Bid</span>
+            <span id="headerStrip-biddingTeam-name-body">
+                <span id="headerStrip-biddingTeam-name">b</span>
+                <span id="headerStrip-biddingTeam-bid">c</span>
+            </span>
+        </div>
+        <div class="cell" id="headerStrip-player-stats">
+            <div id="headerStrip-player-stats-content">
+                <span>M</span><span> 250</span>
+                <span>R</span><span> 10000</span>
+                <span>A</span><span> 50.45</span>
+                <span>Sr</span><span> 150.54</span>
+                <span>O</span><span> 100.4</span>
+                <span>W</span><span> 567</span>
+                <span>E</span><span> 10.23</span>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    let currentAuctionId = null; 
+    let currentPlayerId  = null;
+    let currentPlayer = null;
+    let user = {
+        role: 'guest',    
+        teamId: null      
+    };
+    let auctionData = null;
+    let playersData = null;
+    let teamsData = null;
+    const socket = io();
+
+    const headerStripPlayerLogoImg = document.getElementById('headerStrip-player-logo-img');
+    const headerStripPlayerName = document.getElementById('headerStrip-player-name');
+    const headerStripPlayerCategory = document.getElementById('headerStrip-player-category');
+    const headerStripBiddingTeamName = document.getElementById('headerStrip-biddingTeam-name');
+    const headerStripBiddingTeamNameTitle = document.getElementById('headerStrip-biddingTeam-bid');
+    const headerStripPlayerStats = document.getElementById('headerStrip-player-stats');
+    
+    window.onload = function() {
+        const params = new URLSearchParams(window.location.search);
+        const auctionId = params.get('auctionId');
+        if (!auctionId) {
+          document.body.innerHTML = '<p>No valid Auction selected.</p>';
+          return;
+        }
+        currentAuctionId = auctionId;
+
+        if (!currentPlayer) {
+            headerStripPlayerName.innerHTML = 'No player<br/>selected';
+            headerStripPlayerCategory.innerHTML = '';
+            headerStripBiddingTeamName.innerHTML = '';
+            headerStripBiddingTeamNameTitle.innerHTML = '';
+            headerStripPlayerStats.innerHTML = '';
+        }
+    };
+
+    async function authenticate() {
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: 'guest',
+                    password: 'guest'
+                })
+            });
+
+            if (!response.ok) throw new Error('Failed to authenticate');
+            const data = await response.json();
+            return data.token; // Store the token
+        } catch (err) {
+            console.error('Error during authentication:', err);
+            showPopup('Authentication failed.');
+        }
+    }
+
+    socket.on('connect', () => {
+    console.log('Connected as', socket.id);
+    });
+
+    socket.on('currentPlayerChanged', (playerData) => {
+        console.log('currentPlayerChanged =>', playerData);
+        if (!playerData || !playerData._id) {
+            currentPlayerId = null;
+            headerStripPlayerName.innerHTML = 'No player<br/>selected';
+            headerStripPlayerCategory.innerHTML = '';
+            headerStripBiddingTeamName.innerHTML = '';
+            headerStripPlayerStats.innerHTML = '';
+            return;
+        }
+        currentPlayerId = playerData._id;
+        currentPlayer = playerData;
+        
+        headerStripPlayerName.innerHTML = `${playerData.full_name}`;
+        headerStripBiddingTeamName.innerHTML = `${playerData.final_bid}`;
+        headerStripPlayerLogoImg.src = playerData.image || "./images/images-player.png";
+        headerStripPlayerName.innerHTML = playerData.full_name.replace(/\s+/, '<br/>');
+        headerStripPlayerCategory.innerHTML = '<b>' + (playerData.category || 'N/A') + '</b>';
+        headerStripPlayerStats.innerHTML = `
+            <div id="headerStrip-player-stats-content">
+                <span>M</span><span> ${playerData.matches || '-'}</span>
+                <span>R</span><span> ${playerData.runs || 'N/A'}</span>
+                <span>A</span><span> ${playerData.avg || 'N/A'}</span>
+                <span>Sr</span><span> ${playerData.sr || 'N/A'}</span>
+                <span>O</span><span> ${playerData.overs || 'N/A'}</span>
+                <span>W</span><span> ${playerData.wkts || 'N/A'}</span>
+                <span>E</span><span> ${playerData.econ || 'N/A'}</span>
+            </div>
+        `;
+
+        document.getElementById('headerStrip-player-sold').style.display = 'none';
+        document.getElementById('headerStrip-player-unsold').style.display = 'none';
+
+        if (!currentPlayer) {
+            
+        } else {
+
+        }
+        loadLatestBid();
+    });
+
+    socket.on('bidUpdated', async (data) => {
+        console.log('bidUpdated =>', data);
+
+        if (data.final_bid && data.teamId) {
+            try {
+                const token = await authenticate();
+                const response = await fetch(`/api/teams/${data.teamId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (!response.ok) throw new Error('Failed to fetch team data');
+                const currentTeam = await response.json();
+                if (currentPlayerId === data.playerId) {
+                    headerStripBiddingTeamName.innerHTML = `$${data.final_bid}`;
+                    //document.getElementById('headerStrip-biddingTeam-logo-img').src = currentTeam.image ||"./images/images-team.jpg";
+                    headerStripBiddingTeamNameTitle.innerHTML = currentTeam.team_name.replace(/\s+/, '<br/>');
+                }
+            } catch (err) {
+                console.error('Error fetching team data:', err);
+                showPopup('Could not fetch the data for this team.');
+            }
+        } else {
+            headerStripBiddingTeamName.innerHTML = '';
+            headerStripBiddingTeamNameTitle.innerHTML = 'Waiting for bids...';
+        }
+    });
+
+    socket.on('playerSold', (data) => {
+        console.log('playerSold =>', data);
+        if (data.playerId === currentPlayerId) {
+            currentPlayerId = null;
+            document.getElementById('headerStrip-player-sold').style.display = 'block';
+        }
+    });
+
+    socket.on('playerUnsold', (data) => {
+        console.log('playerUnsold =>', data);
+        if (data.playerId === currentPlayerId) {
+            currentPlayerId = null;
+            document.getElementById('headerStrip-player-unsold').style.display = 'block';
+            headerStripBiddingTeamName.innerHTML = '';
+            headerStripBiddingTeamNameTitle.innerHTML = '!Unsold!';
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from server.');
+    });
+
+    async function loadLatestBid() {
+        try {
+            const token = await authenticate();   
+            const response = await fetch(`/api/players/${currentPlayerId}/last-bid`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+          if (!response.ok) throw new Error('Failed to fetch last bid');
+          const lastBid = await response.json();
+
+          if (!lastBid) {
+            headerStripBiddingTeamName.innerHTML = '';
+            headerStripBiddingTeamNameTitle.innerHTML = 'Waiting for bids...';
+            console.log('No last bid found for this player');
+            return;
+          } 
+          console.log('Last bid found for this player', lastBid);
+
+          
+          const teamResponse = await fetch(`/api/teams/${lastBid.team_id}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (!teamResponse.ok) throw new Error('Failed to fetch team data');
+          const bidTeam = await teamResponse.json();
+
+          headerStripBiddingTeamName.innerHTML = `$${lastBid.amount}`;
+          //document.getElementById('headerStrip-biddingTeam-logo-img').src = bidTeam.image || './images/images-team.jpg';
+          headerStripBiddingTeamNameTitle.innerHTML = bidTeam.team_name.replace(/\s+/, '<br/>');
+
+
+        } catch (err) {
+          console.error('Error loading last bid:', err);
+          headerStripBiddingTeamName.innerHTML = '';
+          headerStripBiddingTeamNameTitle.innerHTML = 'Waiting for bids...';
+        }
+      }
+  </script>
+</body>
+</html>

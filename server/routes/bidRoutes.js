@@ -29,5 +29,14 @@ const upload = require('../middleware/uploadConfig');
       return res.status(500).json({ error: error.message });
     }
   });
+
+  router.delete('/all', authMiddleware, async (req, res) => {
+    try {
+      await Bid.deleteMany({});
+      return res.json({ message: 'All bids have been deleted' });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  });
   
   module.exports = router;

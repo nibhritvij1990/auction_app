@@ -8,7 +8,7 @@
   <link rel="icon" href="./images/favicon.png" type="image/x-icon">
   <style>
     /* A quick modal style (very basic) */
-    #auctionModal {
+    /*#auctionModal {
       display: none; 
       position: fixed; 
       z-index: 999; 
@@ -25,7 +25,7 @@
       padding: 20px;
       width: 400px;
       border-radius: 5px;
-    }
+    } */
     .closeModal {
       float: right;
       cursor: pointer;
@@ -100,11 +100,12 @@
     }
   </style>
 <link rel="stylesheet" type="text/css" href="styles.css">
+<script src="main.js"></script>
 </head>
 <body>
     <header>
         <div><img src="./images/UCLauctionLogo.png" alt="Logo" /></div>
-        <div><span id="headerUserName">UserName</span></div>
+        <div><span id="headerUserName">UserName</span><a id="logout" href="./login.html">Logout</a></div>
     </header>
     <div id="bodyContainer">
   <span id="pageTitle"><h1>Admin Dashboard</h1>
@@ -115,8 +116,8 @@
   <div id="auctions-list"></div>
 
   <!-- Modal for Creating/Editing an Auction -->
-  <div id="auctionModal">
-    <div id="auctionModalContent">
+  <div id="auctionModal" class="modal">
+    <div id="auctionModalContent" class="modal-content">
       <span class="closeModal" id="closeModalBtn">&times;</span>
       <h3 id="modalTitle">Create Auction</h3>
       <!-- PART OF THE MODAL FORM -->

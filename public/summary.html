@@ -6,6 +6,8 @@
   <title>Auction Summary</title>
   <link rel="stylesheet" type="text/css" href="styles.css">
   <link rel="icon" href="./images/favicon.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
   <style>
     .tab-buttons button {
       margin-right: 10px;
@@ -61,6 +63,7 @@
         background: #37246e;
         color: white;
         box-sizing: border-box;
+        gap: 16px;
     }
     #headerStripLeft {
         display: flex;
@@ -109,6 +112,12 @@
    }
     #playersView table td, #playersView table th {
         border: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    #playersView table th {
+        cursor: pointer;
     }
     #secondaryPlayersTables {
         width: auto;
@@ -121,6 +130,28 @@
     }
     #secondaryPlayersTables > div {
         width: 48%;
+    }
+    .summaryExportBtns {
+        background-color: transparent;
+        color: #000000;
+    }
+    h2, h3 {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    h3 > span {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    h3 > span > input[type="text"] {
+        width: 200px;
+        height: 34px;
+        padding: 8px;
+        outline: none;
+        border: 1px solid #ffffff;
+        border-radius: 2px;
     }
   </style>
 </head>
@@ -140,7 +171,9 @@
                 </div>
             </div>
           </div>
-          <div id="dummyBox"></div>
+          <div id="headerStripRight">
+            <button id="reloadBtn"><span class="material-icons">refresh</span></button>
+        </div>
     </div>
     <div id="bodyContainer">
 
@@ -148,14 +181,18 @@
   <div id="playersView" class="hidden">
     <h2>Players</h2>
     <!-- We can show Sold, Unsold, and Available players in separate sections or combined -->
-    <h3>Sold Players</h3>
+    <h3>Sold Players<span>
+        <input type="text" id="soldPlayersFilterInput" style="margin-left: 4px;" placeholder="Type to filter players..." />
+        <button class="controlBtns summaryExportBtns" id="exportSoldPlayersDataButton"><span class="tooltip tooltip-top-right">Export Sold Players</span><span class="material-icons-outlined">download</span></button>
+      </span>
+    </h3>
     <table id="soldTable">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Category</th>
-          <th>Final Bid</th>
-          <th>Sold To</th>
+          <th>Name<span class="material-icons-outlined">sort</span></th>
+          <th>Category<span class="material-icons-outlined">sort</span></th>
+          <th>Final Bid<span class="material-icons-outlined">sort</span></th>
+          <th>Sold To<span class="material-icons-outlined">sort</span></th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -166,8 +203,8 @@
     <table id="unsoldTable">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Category</th>
+          <th>Name<span class="material-icons-outlined">sort</span></th>
+          <th>Category<span class="material-icons-outlined">sort</span></th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -177,8 +214,8 @@
     <table id="availableTable">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Category</th>
+          <th>Name<span class="material-icons-outlined">sort</span></th>
+          <th>Category<span class="material-icons-outlined">sort</span></th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -189,7 +226,7 @@
 
   <!-- Teams View -->
   <div id="teamsView" class="">
-    <h2>Teams</h2>
+    <h2>Teams<button class="controlBtns summaryExportBtns" id="exportTeamsDataButton"><span class="tooltip tooltip-top-right">Export Teams</span><span class="material-icons-outlined">download</span></button></h2>
     <table id="teamsTable">
       <thead>
         <tr>
@@ -223,6 +260,10 @@
     const availableTable = document.getElementById('availableTable').querySelector('tbody');
     const teamsTable = document.getElementById('teamsTable').querySelector('tbody');
 
+    const reloadBtn = document.getElementById('reloadBtn');
+    const exportSoldPlayersDataButton = document.getElementById('exportSoldPlayersDataButton');
+    const exportTeamsDataButton = document.getElementById('exportTeamsDataButton');
+
     // Switch between Players and Teams view
     playersViewBtn.addEventListener('click', () => {
       playersViewDiv.classList.remove('hidden');
@@ -231,6 +272,11 @@
     teamsViewBtn.addEventListener('click', () => {
       teamsViewDiv.classList.remove('hidden');
       playersViewDiv.classList.add('hidden');
+    });
+
+    reloadBtn.addEventListener('click', () => {
+      //window.location.reload();
+      fetchSummaryData();
     });
 
     // On load, fetch summary data
@@ -252,6 +298,11 @@
         return;
       }
 
+      fetchSummaryData(); 
+    };
+
+    async function fetchSummaryData() {
+      // Fetch summary data from the server
       try {
         const res = await fetch(`/api/auctions/${auctionId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -288,10 +339,23 @@
         // Fill the “Teams” table
         renderTeams(summary?.teamSummaries || []);
         renderTeamPlayerMatrix(summary?.soldPlayers || []);
+
+        exportSoldPlayersDataButton.addEventListener('click', () => {
+        console.log('Exporting Sold Players Data');
+        exportData('soldTable', 'soldPlayers.csv');
+        });
+        exportTeamsDataButton.addEventListener('click', () => {
+          console.log('Exporting Teams Data');
+          exportData('teamsTable', 'teams.csv');
+        });
+
+        setUpTableSorting('soldTable');
+        setUpTableSorting('unsoldTable');
+        setUpTableSorting('availableTable');
       } catch(err) {
         document.body.innerHTML = `<p>Error loading summary: ${err.message}</p>`;
       }
-    };
+    }
 
     function renderPlayers(playersArr, tableBody, showFinalBid) {
       tableBody.innerHTML = '';
@@ -353,6 +417,35 @@
 
         teamsTable.appendChild(tr);
       });
+    }
+
+    function exportData(tableId, filename) {
+      console.log('Exporting data:', tableId);
+      const table = document.getElementById(tableId);
+      const rows = Array.from(table.querySelectorAll('tr'));
+      let csvContent = '';
+      
+      rows.forEach(row => {
+        const cols = Array.from(row.querySelectorAll('th, td'));
+        const csvRow = cols.map(col => 
+          '"' + col.innerText.replace(/"/g, '""') + '"'
+        ).join(',');
+        csvContent += csvRow + '\r\n';
+      });
+
+      // Create a Blob from CSV data
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      
+      // Create an invisible link, set its href to our blob, and trigger click
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
     }
 
     function renderTeamPlayerMatrix(soldPlayersArr) {
@@ -418,6 +511,66 @@
             matrixDiv.appendChild(table);
         });
     }
+
+    function setUpTableSorting(tableId) {
+      const table = document.getElementById(tableId);
+      // Query all <th> in the table header
+      const ths = table.querySelectorAll('thead th');
+      
+      ths.forEach((th, colIndex) => {
+        let ascending = true;
+        // Toggle the sort order each time user clicks on a column header
+        th.addEventListener('click', () => {
+          const tbody = table.querySelector('tbody');
+          // Convert all row (tr) elements in tbody to array for sorting
+          const rowsArray = Array.from(tbody.querySelectorAll('tr'));
+          
+          rowsArray.sort((rowA, rowB) => {
+            // Get text content of the two cells in the column being sorted
+            const cellA = rowA.children[colIndex].innerText.trim();
+            const cellB = rowB.children[colIndex].innerText.trim();
+
+            // Decide if numeric or string sort
+            const valA = parseFloat(cellA.replace(/[^0-9.-]+/g, ''));
+            const valB = parseFloat(cellB.replace(/[^0-9.-]+/g, ''));
+
+            // If both are numeric, sort numerically, otherwise do string sort
+            if (!isNaN(valA) && !isNaN(valB)) {
+              return ascending ? valA - valB : valB - valA;
+            } else {
+              return ascending
+                ? cellA.localeCompare(cellB)
+                : cellB.localeCompare(cellA);
+            }
+          });
+
+          // Flip the sort direction for next click on the same column
+          ascending = !ascending;
+          
+          // Reattach rows in new order
+          rowsArray.forEach(row => tbody.appendChild(row));
+        });
+      });
+    }
+
+    function filterSoldPlayers() {
+    const filterValue = document.getElementById('soldPlayersFilterInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#soldTable tbody tr');
+
+    rows.forEach(row => {
+      /* Get the text of each column in this row, converted to lower-case. */
+      const cellsText = Array.from(row.children).map(td => td.innerText.toLowerCase());
+      /* If any column text contains the filterValue, we let the row remain visible. */
+      const found = cellsText.some(txt => txt.includes(filterValue));
+      row.style.display = found ? '' : 'none';
+    });
+  }
+
+  /* Listen for 'input' events on the textbox so it filters in real time. */
+  document.getElementById('soldPlayersFilterInput')
+    .addEventListener('input', filterSoldPlayers);
+
+
   </script>
 </body>
 </html>

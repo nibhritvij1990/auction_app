@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
     /* Basic styling */
-    body {
+    html, body {
       background-color: #ffffff;
     }
 
@@ -400,6 +400,17 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
   </style>
+
+  <script>
+      function adjustZoom() {
+        const zoomRatio = window.innerHeight / 975;
+        document.body.style.zoom = zoomRatio;
+      }
+      if (window.innerHeight < 975) {
+        window.addEventListener('resize', adjustZoom);
+        window.addEventListener('load', adjustZoom);
+      }
+    </script>
 </head>
 <body>
   <!-- Popup message div for replacing alert(...) -->
@@ -525,6 +536,8 @@
       const popupContainer   = document.getElementById('popupContainer');
       const popupCloseButton = document.getElementById('popupCloseButton');
 
+      let nextPlayerBtnClicked = false;
+
       // Popup overlay logic
       popupTrigger.addEventListener('click', (e) => {
         popupOverlay.style.display = 'flex'; 
@@ -575,7 +588,8 @@
 
         // If user is admin, show adminOnly items
         if (user.role != 'admin') {
-          document.getElementById('openSummaryPage').style.zoom = '2';
+          document.getElementById('openSummaryPage').style.zoom = '1.5';
+          teamBidButtonsDiv.parentElement.style.display = 'none';
           document.getElementById('openSummaryPage').style.margin = '0';
           document.getElementById('openSummaryPage').style.background = '#37246e';
           document.getElementById('openSummaryPage').style.border = '0';
@@ -609,9 +623,11 @@
         if (!currentPlayer) {
           document.getElementById('headerStrip-biddingTeam').style.width = '0';
           document.getElementById('headerStrip-player-container').style.display = 'none';
-          undoBidBtn.disabled = true;
-          markSoldBtn.disabled = true;
-          markUnsoldBtn.disabled = true;
+          if (user.role === 'admin') {
+            undoBidBtn.disabled = true;
+            markSoldBtn.disabled = true;
+            markUnsoldBtn.disabled = true;
+          }
         }
       };
 
@@ -730,7 +746,8 @@
       nextPlayerBtn.addEventListener('click', () => {
         if (user.role !== 'admin') return;
         console.log('Emitting nextPlayer...');
-        socket.emit('nextPlayer');
+        nextPlayerBtnClicked = true;
+        socket.emit('nextPlayer', { auctionId: currentAuctionId });
       });
 
       markSoldBtn.addEventListener('click', async () => {
@@ -830,11 +847,14 @@
           nextPlayerBtn.disabled = false;
           currentPlayerDiv.innerHTML = 'No current player.';
           currentBidDiv.innerHTML = 'No bid.';
+          if (nextPlayerBtnClicked) {
+            showPopup('No player available in this Set.');
+          }
           return;
         }
         currentPlayerId = playerData._id;
         currentPlayer = playerData;
-        nextPlayerBtn.disabled = true;
+        
         currentPlayerDiv.innerHTML = `Current Player: ${playerData.full_name} (${playerData._id})`;
         currentBidDiv.innerHTML = `Final Bid: ${playerData.final_bid}`;
         document.getElementById('headerStrip-player-logo-img').src = playerData.image || "./images/images-player.png";
@@ -856,15 +876,18 @@
         document.getElementById('headerStrip-player-info').style.color = 'white';
         document.getElementById('headerStrip-biddingTeam-info').style.color = 'white';
         document.getElementById('headerStrip-biddingTeam').style.width = '0';
-        document.getElementById('markSoldBtn').disabled = true;
-        document.getElementById('markUnsoldBtn').disabled = false;
-        document.getElementById('undoBidBtn').disabled = true;
+        if (user.role === 'admin') {
+          document.getElementById('nextPlayerBtn').disabled = true;
+          document.getElementById('markSoldBtn').disabled = true;
+          document.getElementById('markUnsoldBtn').disabled = false;
+          document.getElementById('undoBidBtn').disabled = true;
+        }
 
         if (!currentPlayer) {
           document.getElementById('headerStrip-biddingTeam').style.width = '0';
           document.getElementById('headerStrip-player-container').style.display = 'none';
         } else {
-          document.getElementById('headerStrip-biddingTeam').style.width = 'fit-content';
+          document.getElementById('headerStrip-biddingTeam').style.width = '0';
           document.getElementById('headerStrip-player-container').style.display = 'flex';
           document.querySelectorAll('#teamBidButtonsDiv > button').forEach(button => {
             button.disabled = false;
@@ -894,9 +917,11 @@
               document.getElementById('headerStrip-biddingTeam-bid').innerHTML = `$${data.final_bid}`;
               document.getElementById('headerStrip-biddingTeam-name').innerHTML = currentTeam.team_name;
               document.getElementById('headerStrip-biddingTeam').style.width = 'fit-content';
-              document.getElementById('markSoldBtn').disabled = false;
-              document.getElementById('markUnsoldBtn').disabled = true;
-              document.getElementById('undoBidBtn').disabled = false;
+              if (user.role === 'admin') {
+                document.getElementById('markSoldBtn').disabled = false;
+                document.getElementById('markUnsoldBtn').disabled = true;
+                document.getElementById('undoBidBtn').disabled = false;
+              }
             }
           } catch (err) {
             console.error('Error fetching team data:', err);
@@ -904,9 +929,11 @@
           }
         } else {
           document.getElementById('headerStrip-biddingTeam').style.width = '0';
-          document.getElementById('markSoldBtn').disabled = true;
-          document.getElementById('markUnsoldBtn').disabled = false;
-          document.getElementById('undoBidBtn').disabled = true;
+          if (user.role === 'admin') {
+            document.getElementById('markSoldBtn').disabled = true;
+            document.getElementById('markUnsoldBtn').disabled = false;
+            document.getElementById('undoBidBtn').disabled = true;
+          }
         }
       });
 
@@ -921,9 +948,11 @@
           document.querySelectorAll('#teamBidButtonsDiv > button').forEach(button => {
             button.disabled = true;
           });
-          markUnsoldBtn.disabled = true;
-          markSoldBtn.disabled = true;
-          undoBidBtn.disabled = true;
+          if (user.role === 'admin') {
+            markUnsoldBtn.disabled = true;
+            markSoldBtn.disabled = true;
+            undoBidBtn.disabled = true;
+          }
           document.getElementById('headerStrip-player-sold').style.display = 'block';
         }
       });
@@ -939,9 +968,11 @@
           document.querySelectorAll('#teamBidButtonsDiv > button').forEach(button => {
             button.disabled = true;
           });
-          markUnsoldBtn.disabled = true;
-          markSoldBtn.disabled = true;
-          undoBidBtn.disabled = true;
+          if (user.role === 'admin') {
+            markUnsoldBtn.disabled = true;
+            markSoldBtn.disabled = true;
+            undoBidBtn.disabled = true;
+          }
           document.getElementById('headerStrip-player-unsold').style.display = 'block';
         }
       });
@@ -1048,12 +1079,15 @@
           document.getElementById('headerStrip-biddingTeam-name').innerHTML = bidTeam.team_name;
           document.getElementById('headerStrip-biddingTeam').style.width = 'fit-content';
 
-          markSoldBtn.disabled = false;
-          markUnsoldBtn.disabled = true;
-          undoBidBtn.disabled = false;
+          if (user.role === 'admin') {
+            markSoldBtn.disabled = false;
+            markUnsoldBtn.disabled = true;
+            undoBidBtn.disabled = false;
+          }
 
         } catch (err) {
           console.error('Error loading last bid:', err);
+          document.getElementById('headerStrip-biddingTeam').style.width = '0';
         }
       }
     </script>

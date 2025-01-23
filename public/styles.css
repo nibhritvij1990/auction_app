@@ -68,6 +68,18 @@ header span {
     font-size: 16px;
     font-weight: bold;
 }
+#logout {
+    background-color: #ffffff;
+    color: #000000;
+    border: 0px solid #ffffff;
+    padding: 8px 16px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 16px;
+    text-transform: capitalize;
+    text-decoration: none;
+    position: relative;
+}
 
 #bgImage {
     background-size: cover;

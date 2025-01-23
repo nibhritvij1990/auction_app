@@ -164,7 +164,7 @@ const io = new Server(server, {
 
 
   // Next Player logic from before:
-  socket.on('nextPlayer', async () => {
+  socket.on('nextPlayer', async (auctionData) => {
     try {
         console.log('Received nextPlayer event from client:', socket.id);
       if (!currentSet) {
@@ -172,7 +172,8 @@ const io = new Server(server, {
         return;
       }
       let filters = {
-        auction_id: "677cd0286877dbfe9da743a6",
+        //auction_id: "677cd0286877dbfe9da743a6",
+        auction_id: auctionData.auctionId,
         //auction_set: currentSet,
         //status: { $in: ['available', 'unsold'] },
         status: { $in: ['available'] }

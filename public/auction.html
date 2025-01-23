@@ -177,7 +177,7 @@
 
     <header>
         <div><img src="./images/UCLauctionLogo.png" alt="Logo" /></div>
-        <div><button onclick="window.location.href='admin.html'">← Back to Admin</button><span id="headerUserName">UserName</span></div>
+        <div><button onclick="window.location.href='admin.html'">← Back to Admin</button><span id="headerUserName">UserName</span><a id="logout" href="./login.html">Logout</a></div>
     </header>
     <div id="headerStrip">
           <div id="headerStripLeft">
@@ -447,6 +447,9 @@
           }
         }
 
+        const auctionDashboardBtn = document.getElementById('auctionDashboardBtn');
+        auctionDashboardBtn.addEventListener('click', openAuctionDashboard);
+
         getAuctionDetails();
     };
 
@@ -701,6 +704,8 @@
 
       const bulkUpdateBtn = document.getElementById('bulkUpdatePlayersBtn');
       bulkUpdateBtn.addEventListener('click', openBulkUpdateModal);
+
+      
     }
 
     // Mark All Unsold => Available
@@ -785,7 +790,7 @@
         const updates = JSON.parse(rawJson);
         const res = await fetch('/api/players/bulk-update', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify(updates)
         });
         const data = await res.json();
@@ -1081,6 +1086,10 @@
         showPopup('Network error fetching players data.');
         console.error(err);
       }
+    }
+
+    function openAuctionDashboard() {
+      window.open('dashboard.html?auctionId=' + auctionId, '_blank');
     }
         
     // CLOSE MODALS WHEN CLICKING OUTSIDE

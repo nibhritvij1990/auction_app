@@ -82,7 +82,8 @@ router.post('/', authMiddleware, (req, res, next) => {
         team_name,
         purse,
         max_players,
-        image_url
+        image_url,
+        current_players
       } = req.body;
   
       // 1) Find existing team
@@ -111,6 +112,9 @@ router.post('/', authMiddleware, (req, res, next) => {
       }
       if (max_players !== undefined && max_players.trim() !== '') {
         team.max_players = Number(max_players);
+      }
+      if (current_players !== undefined && current_players.trim() !== '') {
+        team.current_players = Number(current_players);
       }
   
       // Update image

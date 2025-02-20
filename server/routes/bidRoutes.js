@@ -10,7 +10,8 @@ const upload = require('../middleware/uploadConfig');
 
   router.get('/', authMiddleware, async (req, res) => {
     try {
-      const bids = await Bid.find();
+      const filter = { ...req.query };
+      const bids = await Bid.find(filter);
       return res.json(bids);
     } catch (error) {
       return res.status(500).json({ error: error.message });

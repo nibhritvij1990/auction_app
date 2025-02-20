@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Auction Ticker</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="icon" href="./images/favicon.png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        html, body {
+            background-color: rgba(0, 177, 64, 0);
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        #ticker-container {
+            width: 100%;
+            height: 64px;
+            background-color: #25135c;
+        }
+        #ticker-wrapper {
+            display: grid;
+            grid-template-columns: fit-content(100%) 1fr;
+            padding: 8px 16px;
+            gap: 16px;
+            width: 100%;
+            height: 100%;
+        }
+        #ticker-column-left-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 48px;
+        }
+        #ticker-column-left-image-img {
+            height: 100%;
+        }
+        
+        /* Make the wrapper overflow hidden so the scrolling content stays inside */
+        #ticker-marquee-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex; 
+            align-items: center;
+            overflow: hidden; 
+            color: #fff;
+            font-size: 18px;
+        }
+
+        /* The scrolling container */
+        #ticker-marquee {
+            display: inline-flex; 
+            gap: 24px;
+            width: fit-content;
+            min-width: 100%;
+            white-space: nowrap;
+            position: absolute; 
+            animation: marquee 20s linear infinite;
+        }
+
+        /* Keyframes for continuous scrolling from right to left */
+        @keyframes marquee {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        .ticker-marquee-text:nth-child(2n) {
+            color: #fe0188;
+        }
+    </style>
+</head>
+<body>
+    <div id="ticker-container">
+        <div id="ticker-wrapper">
+            <div id="ticker-column-left">
+                <div id="ticker-column-left-image">
+                    <img id="ticker-column-left-image-img" src="./images/UCLauctionLogo2.jpg" alt=""/>
+                </div>
+            </div>
+            <div id="ticker-column-right">
+                <div id="ticker-marquee-wrapper">
+                    <div id="ticker-marquee">
+                        <span class="ticker-marquee-text">
+                            Welcome to the
+                        </span>
+                        <span class="ticker-marquee-text">
+                            Mission Walk United Cricket League
+                        </span>
+                        <span class="ticker-marquee-text">
+                            Season 2 -
+                        </span>
+                        <span class="ticker-marquee-text">
+                            Player Auction!
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let currentAuctionId = null; 
+        let user = {
+            role: 'guest',    
+            teamId: null      
+        };
+
+        const socket = io();
+
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            const auctionId = params.get('auctionId');
+            if (!auctionId) {
+                document.body.innerHTML = '<p>No valid Auction selected.</p>';
+                return;
+            }
+            currentAuctionId = auctionId;
+
+            loadMarqueeData();
+        };
+
+       const marquee = document.getElementById('ticker-marquee');
+
+        socket.on('connect', () => {
+            console.log('Connected as', socket.id);
+        });
+
+        socket.on('playerSold', async (data) => {
+            console.log('playerSold =>', data);
+            loadMarqueeData();
+        });
+
+        socket.on('playerUnsold', async (data) => {
+            console.log('playerUnsold =>', data);
+            loadMarqueeData();
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server.');
+        });
+
+        async function authenticate() {
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'guest',
+                        password: 'guest'
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to authenticate');
+                const data = await response.json();
+                return data.token; // Store the token
+            } catch (err) {
+                console.error('Error during authentication:', err);
+            }
+        }
+
+        async function loadMarqueeData() {
+            const token = await authenticate();
+            const playersResponse = await fetch(`/api/players?auction_id=${currentAuctionId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            let playersData = await playersResponse.json();            
+
+            // Filter to only include players with status 'sold' or 'unsold'
+            playersData = playersData.filter(player => {
+                const status = (player.status || '').toLowerCase();
+                return status === 'sold' || status === 'unsold';
+            });
+
+            if (playersData.length > 0) {
+
+                // Sort by "auctionedAt" descending (most recent first).
+                // Convert string to Date for accurate comparison.
+                playersData.sort((a, b) => {
+                    return new Date(b.auctionedAt) - new Date(a.auctionedAt);
+                });
+
+                console.log('Sorted (descending) playerData =>', playersData);
+
+                // Update the marquee with the new player data
+                marquee.innerHTML = '';
+                var arrLen = 5;
+                if (playersData.length < arrLen) {
+                    arrLen = playersData.length;
+                }
+                for (var i = 0; i < arrLen; i++) {
+                    if (playersData[i].status == 'sold') {
+                        const teamsResponse = await fetch(`/api/teams/${playersData[i].sold_to_team_id}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const teamData = await teamsResponse.json();
+                        marquee.innerHTML += `
+                            <span class="ticker-marquee-text">
+                                ${playersData[i].full_name} was sold to ${teamData.team_name} for $${playersData[i].final_bid}!
+                            </span>
+                        `;
+                    } else {
+                        marquee.innerHTML += `
+                            <span class="ticker-marquee-text">
+                                ${playersData[i].full_name} went unsold.
+                            </span>
+                        `;
+                    }
+                }
+            }
+        }
+
+
+    </script>
+</body>
+</html>

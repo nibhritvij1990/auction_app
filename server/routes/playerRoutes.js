@@ -236,7 +236,8 @@ router.delete('/:playerId', authMiddleware, async (req, res) => {
   }, async (req, res) => {
     try {
       const { playerId } = req.params;
-      const { full_name, category, base_price, image_url, image_file, auction_set } = req.body;
+      //const { full_name, category, base_price, image_url, image_file, auction_set } = req.body;
+      const { full_name, category, base_price, image_url, image_file, auction_set, status, final_bid, sold_to_team_id, notes } = req.body;
   
       // 1) Find existing player
       const player = await Player.findById(playerId);
@@ -272,6 +273,20 @@ router.delete('/:playerId', authMiddleware, async (req, res) => {
       player.image = finalImage;
 
       player.auction_set = auction_set;
+
+      // New fields
+      if (status !== undefined) {
+        player.status = status;
+      }
+      if (final_bid !== undefined) {
+        player.final_bid = final_bid;
+      }
+      if (sold_to_team_id !== undefined) {
+        player.sold_to_team_id = sold_to_team_id;
+      }
+      if (notes !== undefined) {
+        player.notes = notes;
+      }
   
       // 4) Save
       await player.save();

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Ngrok Bypass</title>
+  <style>
+    /* Make sure our page (the fetched content) fills the entire browser source */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    #content {
+      width: 100%;
+      height: 100%;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+   <link rel="stylesheet" href="https://really-trusty-boar.ngrok-free.app/styles.css">
+</head>
+<body>
+  <div id="content">Loading content...</div>
+  <iframe src="https://really-trusty-boar.ngrok-free.app/ticker.html?auctionId=677cd0286877dbfe9da743a6"></iframe>
+  Hello
+  
+  <script>
+    // Replace the string below with your actual ngrok URL
+    const ngrokURL = "https://really-trusty-boar.ngrok-free.app/ticker.html?auctionId=677cd0286877dbfe9da743a6";
+
+    fetch(ngrokURL, {
+      headers: {
+        "ngrok-skip-browser-warning": "bypass"
+      }
+    })
+    .then(response => response.text())
+    .then(html => {
+      // Write the HTML we got from ngrok into the page:
+      document.getElementById("content").innerHTML = html;
+
+      // If the returned page has its own scripts, some might need re-injection.
+      // For many pages, simply writing the HTML is enough. If not, you can parse the 
+      // HTML and manually add any <script> tags. This depends on your use case.
+    })
+    .catch(err => {
+      document.getElementById("content").innerText = 
+        "Error fetching page:\n" + err;
+    });
+  </script>
+</body>
+</html>

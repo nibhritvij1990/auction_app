@@ -7,10 +7,13 @@ const upload = require('../middleware/uploadConfig');
 // GET all teams
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const teams = await Team.find();
-    res.json(teams);
+    // Directly use all query params in the filter
+    const filter = { ...req.query };
+
+    const teams = await Team.find(filter);
+    return res.json(teams);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 

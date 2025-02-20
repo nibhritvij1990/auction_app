@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Auction Ticker</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="icon" href="./images/favicon.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    /* Basic styling */
+    html, body {
+      background-color: rgba(0, 177, 64, 0);
+      width: max-content;
+      height: max-content;
+      overflow: visible;
+    }
+    * {
+        box-sizing: border-box;
+    }
+    div, span {
+        background-color: rgba(7, 252, 96, 0);
+        line-height: 1.5;
+    }
+    #ticker-container {
+        margin: 50px;
+        display: block;
+        width: 850px;
+        height: 400px;
+        /*background:url("https://i.imgur.com/299ntea.png") no-repeat center center;*/
+        background-size: 100% 100%;
+        position: relative;
+    }
+    #ticker-wrapper {
+        display: grid;
+        width: 100%;
+        height: 100%;
+        grid-template-columns: 300px 1fr;
+        position: relative;
+        z-index: 10;
+    }
+    #ticker-column-left, #ticker-column-right {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    #ticker-column-left {
+        background-color: #c70072;
+    }
+    #ticker-column-right {
+        background-color: #25135c;
+        padding: 16px;
+    }
+    #p-image {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1/1;
+    }
+    #headerStrip-player-logo-img {
+        width: 100%;
+        height: 100%;
+        border: 3px solid #c70072;
+        border-bottom: none;
+    }
+    #p-bid {
+        width: 100%;
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+    #p-bid-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #000;
+        background-color: #fff;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 33px;
+        width: 100%;
+        border: 3px solid #c70072;
+        border-bottom: none;
+    }
+    #headerStrip-biddingTeam-bid {
+        font-size: 48px;
+        font-weight: bold;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 67px;
+        width: 100%;
+        border: 3px solid #c70072;
+        background-color: #c70072;
+    }
+    #p-name {
+        font-size: 48px;
+        font-weight: bold;
+    }
+    #headerStrip-player-name-first {
+        color: #fff;
+    }
+    #headerStrip-player-name-last {
+        color: #c70072;
+    }
+    #p-category {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
+    #headerStrip-player-category {
+        color: #c70072;
+        font-size: 24px;
+        font-weight: bold;
+    }
+    #headerStrip-player-style-batting, #headerStrip-player-style-bowling {
+        color: #fff;
+        font-size: 16px;
+        font-weight: bold;
+    }
+    #p-team {
+        display: flex;
+        gap: 16px;
+    }
+    #p-team-title {
+        color: #fff;
+        font-size: 24px;
+        font-weight: bold;
+    }
+    #headerStrip-biddingTeam-name {
+        color: #25135c;
+        background-color: #fff;
+        font-size: 24px;
+        font-weight: bold;
+        padding: 0 16px;
+    }
+    #p-stats {
+        width: 100%;
+    }
+    .p-stats-title {
+        color: #fff;
+        font-size: 12px;
+        font-style: italic;
+    }
+    #p-stats-table-batting, #p-stats-table-bowling {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        background-color: #c70072;
+        color: #fff;
+        text-align: center;
+        padding: 4px;
+    }
+    .p-stats-table-header {
+        font-weight: bold;
+        background-color: #fff;
+        color: #25135c;
+    }
+  </style>
+</head>
+<body>
+
+    <div id="ticker-container">
+        <div id="ticker-wrapper">
+            <div id="ticker-column-left">
+                <div id="p-image">
+                    <img id="headerStrip-player-logo-img" src="./images/images-player.png" alt=""/>
+                </div>
+                <div id="p-bid">
+                    <span id="p-bid-title">PRICE</span>
+                    <span id="headerStrip-biddingTeam-bid">$-</span>
+                </div>
+            </div>
+            <div id="ticker-column-right">
+                <div id="p-name-wrapper">
+                    <div id="p-name">
+                        <span id="headerStrip-player-name-first">Player</span>
+                        <span id="headerStrip-player-name-last">Name</span>
+                    </div>
+                    <div id="p-category">
+                        <span id="headerStrip-player-category">Playing Role</span>
+                        <span id="headerStrip-player-style-batting">Right Hand Bat</span>
+                        <span id="headerStrip-player-style-bowling">Right Arm Medium Fast</span>
+                    </div>
+                </div>
+                <div id="p-team">
+                    <!--span id="p-team-title">Team</span>-->
+                    <span id="headerStrip-biddingTeam-name">Team Name</span>
+                </div>
+                <div id="p-stats">
+                    <span class="p-stats-title">Batting</span>
+                    <div id="p-stats-table-batting">
+                        <span class="p-stats-table-header">Matches</span>
+                        <span class="p-stats-table-header">Runs</span>
+                        <span class="p-stats-table-header">Average</span>
+                        <span class="p-stats-table-header">Strike Rate</span>
+                        <span> -</span>
+                        <span> -</span>
+                        <span> -</span>
+                        <span> -</span>
+                    </div>
+                    <span class="p-stats-title">Bowling</span>
+                    <div id="p-stats-table-bowling">
+                        <span class="p-stats-table-header">Matches</span>
+                        <span class="p-stats-table-header">Overs</span>
+                        <span class="p-stats-table-header">Wickets</span>
+                        <span class="p-stats-table-header">Economy</span>
+                        <span> -</span>
+                        <span> -</span>
+                        <span> -</span>
+                        <span> -</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    let currentAuctionId = null; 
+    let user = {
+        role: 'guest',    
+        teamId: null      
+    };
+    let playerData = null;
+    let teamData = null;
+    const socket = io({
+        query: {
+            page: 'ticker_lastSold'
+        }
+    });
+
+    const headerStripPlayerLogoImg = document.getElementById('headerStrip-player-logo-img');
+    const headerStripPlayerNameFirst = document.getElementById('headerStrip-player-name-first');
+    const headerStripPlayerNameLast = document.getElementById('headerStrip-player-name-last');
+    const headerStripPlayerCategory = document.getElementById('headerStrip-player-category');
+    const headerStripBiddingTeamName = document.getElementById('headerStrip-biddingTeam-name');
+    const headerStripBiddingTeamBid = document.getElementById('headerStrip-biddingTeam-bid');
+    //const headerStripBiddingTeamLogo = document.getElementById('headerStrip-biddingTeam-logo-img');
+    const headerStripPlayerStyleBatting = document.getElementById('headerStrip-player-style-batting');
+    const headerStripPlayerStyleBowling = document.getElementById('headerStrip-player-style-bowling');
+    const headerStripPlayerStatsTableBatting = document.getElementById('p-stats-table-batting');
+    const headerStripPlayerStatsTableBowling = document.getElementById('p-stats-table-bowling');
+
+    window.onload = function() {
+        const params = new URLSearchParams(window.location.search);
+        const auctionId = params.get('auctionId');
+        if (!auctionId) {
+          document.body.innerHTML = '<p>No valid Auction selected.</p>';
+          return;
+        }
+        currentAuctionId = auctionId;
+    };
+
+    async function authenticate() {
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: 'guest',
+                    password: 'guest'
+                })
+            });
+
+            if (!response.ok) throw new Error('Failed to authenticate');
+            const data = await response.json();
+            return data.token; // Store the token
+        } catch (err) {
+            console.error('Error during authentication:', err);
+            showPopup('Authentication failed.');
+        }
+    }
+
+    async function loadLatestSoldPlayer(data) {
+        try {
+            const token = await authenticate();   
+            let response = null;
+            
+            response = await fetch(`/api/players/${data.playerId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) throw new Error('Failed to fetch last sold player');
+            playerData = await response.json();
+
+            response = await fetch(`/api/teams/${data.sold_to}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) throw new Error('Failed to fetch team data');
+            teamData = await response.json();
+
+        } catch (err) {
+            console.error('Error loading last sold player:', err);
+        }
+    } 
+
+    socket.on('connect', () => {
+        console.log('Connected as', socket.id);
+    });
+
+
+    socket.on('playerSold', async (data) => {
+        console.log('playerSold =>', data);
+        if (data) {
+            await loadLatestSoldPlayer(data);
+
+            let playerNameArray = playerData.full_name.replace(/\s+/, 'ZOPHAR').split('ZOPHAR');
+            headerStripPlayerLogoImg.src = playerData.image;
+            headerStripPlayerNameFirst.innerHTML = playerNameArray[0];
+            headerStripPlayerNameLast.innerHTML = playerNameArray[1];
+            headerStripPlayerCategory.innerHTML = playerData.category;
+            headerStripBiddingTeamName.innerHTML = teamData.team_name;
+            headerStripBiddingTeamBid.innerHTML = `$${playerData.final_bid}`;
+            //headerStripBiddingTeamLogo
+            headerStripPlayerStyleBatting.innerHTML = playerData.bat_style;
+            headerStripPlayerStyleBowling.innerHTML = playerData.bowl_style;
+            headerStripPlayerStatsTableBatting.innerHTML = `
+                <span class="p-stats-table-header">Matches</span>
+                <span class="p-stats-table-header">Runs</span>
+                <span class="p-stats-table-header">Average</span>
+                <span class="p-stats-table-header">Strike Rate</span>
+                <span>${playerData.matches}</span>
+                <span>${playerData.runs}</span>
+                <span>${playerData.avg}</span>
+                <span>${playerData.sr}</span>
+            `;
+            headerStripPlayerStatsTableBowling.innerHTML = `
+                <span class="p-stats-table-header">Matches</span>
+                <span class="p-stats-table-header">Overs</span>
+                <span class="p-stats-table-header">Wickets</span>
+                <span class="p-stats-table-header">Economy</span>
+                <span>${playerData.matches}</span>
+                <span>${playerData.overs}</span>
+                <span>${playerData.wkts}</span>
+                <span>${playerData.econ}</span>
+            `;
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from server.');
+    });
+
+  </script>
+</body>
+</html>

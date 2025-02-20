@@ -134,6 +134,20 @@
       display: none;
     }
 
+    #headerStrip-player-link-popup {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 32px;
+      height: 32px;
+      z-index: 10;
+      text-decoration: none;
+      color: #36246e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     #headerStrip-player-logo {
       width: 227px;
       height: 227px;
@@ -224,7 +238,7 @@
     }
     #sponsors > div:nth-child(1) {
       background-color: #ffffff;
-      background-image: url('./images/logo-sponsor-title.jpeg')  ;
+      background-image: url('./images/Mission-Walk-Logo.jpeg')  ;
       background-size: contain;
       background-position: center;
       background-repeat: no-repeat;
@@ -362,10 +376,10 @@
       display: none;
     }
     #setSelect {
-      width: 100px;
+      width: auto;
       height: 32px;
       border-radius: 2px;
-      padding-left: 8px;
+      padding: 0 6px 0 8px;
       outline: none;
     }
     button, .button {
@@ -399,12 +413,96 @@
       font-family: sans-serif;
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
+
+    #menuList {
+      display: none; 
+      position: absolute; 
+      right: 0;
+      top: 30px;
+      background-color: #fff; 
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      width: max-content;
+    }
+    #menuList span {
+      width: 100%;
+      background-color: #eee;
+      display: block;
+    }
+    #menuList span a {
+      width: 100%;
+      text-decoration: none;
+      color: #000;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-bottom: 1px solid #ccc;
+      display: block;
+      font-size: 12px;
+    }
+    #bidding-tools > div#findPlayerContainer {
+      width: 75%;
+      height: auto;
+      border-radius: 2px;
+      padding: 16px;
+      outline: none;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      bottom: calc(100% - 16px);
+      left: 0px;
+      border: 2px solid #36246e;
+      background: white;
+      box-shadow: 0px 0px 16px 4px rgba(0, 0, 0, 0.5);
+      z-index: 100;
+    }
+    #findPlayerSearchInput {
+      width: 90%;
+      height: 48px;
+      border-radius: 2px;
+      padding: 0 8px;
+      outline: none;
+      display: inline-block;
+      border-color: #36246e;
+    }
+    #findPlayerSearchResults {
+      width: 90%;
+      max-height: 256px;
+      overflow-y: auto;
+    }
+    #findPlayerSearchResults table {
+      width: 100%;
+    }
+    #findPlayerSearchResults tr {
+      cursor: pointer;
+      height: 48px;
+    }
+    #findPlayerSearchResults tr:hover {
+      background-color: #eeeeee;
+    }
+    #findPlayerSearchResults tr td:first-child {
+      width: 48px;
+    }
+    #findPlayerSearchResults tr img {
+      width: 48px;
+      height: 48px;
+    }
+    #findPlayerSearchTint {
+      position: fixed;
+      background: rgba(0, 0, 0, 0.0);
+      z-index: -1;
+    }
   </style>
 
   <script>
       function adjustZoom() {
         const zoomRatio = window.innerHeight / 975;
         document.body.style.zoom = zoomRatio;
+        //document.getElementById('headerStrip-player-info').style.zoom = zoomRatio;
+        //document.getElementById('headerStrip-player-name').style.fontSize = '32px';
       }
       if (window.innerHeight < 975) {
         window.addEventListener('resize', adjustZoom);
@@ -418,7 +516,17 @@
 
   <header>
     <div><img src="./images/UCLauctionLogo.png" alt="Logo" /></div>
-    <div><span id="headerUserName">UserName</span></div>
+    <div>
+      <span class="button" onmouseover="document.getElementById('menuList').style.display='flex'" onmouseout="document.getElementById('menuList').style.display='none'">
+        Tickers
+        <div id="menuList">
+          <span><a href="./ticker.html" target="_blank" onclick="this.href='./ticker.html?auctionId=' + currentAuctionId">Ticker 1</a></span>
+          <span><a href="./ticker2.html" target="_blank" onclick="this.href='./ticker2.html?auctionId=' + currentAuctionId">Ticker 2</a></span>
+          <span><a href="./ticker_lastSold.html" target="_blank" onclick="this.href='./ticker_lastSold.html?auctionId=' + currentAuctionId">Last Sold</a></span>
+        </div>
+      </span>
+      <span id="headerUserName">UserName</span>
+    </div>
   </header>
   <div id="headerStrip">
         <div id="headerStrip-biddingTeam">
@@ -430,6 +538,7 @@
         </div>
         <div id="headerStrip-player">
           <div class="tint"></div>
+          <a id="headerStrip-player-link-popup" href="https://cricheroes.in" target="_blank"><span class="material-icons">open_in_new</span></a>
           <div id="headerStrip-player-container">
             <div id="headerStrip-player-unsold"></div>
             <div id="headerStrip-player-sold"></div>
@@ -451,15 +560,29 @@
       <div id="sponsors">
         <div></div>
         <div></div>
-        <div><img src="./images/logo-sponsor-strip.jpeg" alt="Sponsor Logo" /></div>
+        <div><img src="./images/sponsor-ticker.jpeg" alt="Sponsor Logo" /></div>
       </div>
       <div id="bidding-tools">
+        
         <!-- Existing content inside #bidding-tools ... -->
         <div class="adminOnly">
-          <span><button id="nextPlayerBtn"><span class="tooltip tooltip-right">Next Random Player</span><span class="material-icons">hail</span></button></span>
-          <span><strong>Set:</strong>
-          <select id="setSelect"></select>
-          <button id="selectSetBtn" style="zoom: 0.8;"><span class="material-icons">check</span></button></span>
+          <span>
+            <button id="nextPlayerBtn">
+              <span class="tooltip tooltip-top-left">Next Random Player</span>
+              <span class="material-icons">hail</span>
+            </button>
+            <button id="findPlayerBtn">
+              <span class="tooltip tooltip-top-left">Find Next Player</span>
+              <span class="material-icons">person_search</span>
+            </button>
+          </span>
+          <span>
+            <strong>Set:</strong>
+            <select id="setSelect"></select>
+            <button id="selectSetBtn" style="zoom: 0.8;">
+              <span class="material-icons">check</span>
+            </button>
+          </span>
         </div>
         <div>
           <div id="teamBidButtonsDiv"></div>
@@ -484,6 +607,11 @@
               <button id="markAllUnsoldBtn"><span class="material-icons">currency_exchange</span>Mark All Unsold → Available</button>
             </div>
           </div>
+        </div>
+        <div id="findPlayerContainer">
+          <div id="findPlayerSearchResults"></div>
+          <input id="findPlayerSearchInput" type="text" placeholder="Player Name" />
+          <div class="tint" id="findPlayerSearchTint"></div>
         </div>
       </div>
     </div>
@@ -512,6 +640,8 @@
       let playersData = null;
       let teamsData = null;
 
+      let playersInSet = null;
+
       let token = null;
 
       const socket = io();
@@ -522,6 +652,11 @@
       const setSelect          = document.getElementById('setSelect');
       const selectSetBtn       = document.getElementById('selectSetBtn');
       const nextPlayerBtn      = document.getElementById('nextPlayerBtn');
+      const findPlayerBtn      = document.getElementById('findPlayerBtn');
+      const searchInput        = document.getElementById('findPlayerSearchInput');
+      const searchResults      = document.getElementById('findPlayerSearchResults');
+      const searchContainer    = document.getElementById('findPlayerContainer');
+      const searchOverlay      = document.getElementById('findPlayerSearchTint');
       const markSoldBtn        = document.getElementById('markSoldBtn');
       const markUnsoldBtn      = document.getElementById('markUnsoldBtn');
       const markAllUnsoldBtn   = document.getElementById('markAllUnsoldBtn');
@@ -551,6 +686,13 @@
         }
       });
 
+      findPlayerBtn.addEventListener('click', () => {
+        searchContainer.style.display = 'flex';
+      });
+      searchOverlay.addEventListener('click', () => {
+        searchContainer.style.display = 'none';
+      });
+
       // Function to show popup messages (replacing alert)
       function showPopup(message) {
         const popup = document.getElementById('popupMessage');
@@ -565,6 +707,7 @@
        * PAGE LOAD INITIALIZATION
        ********************************************************************/
       window.onload = function() {
+        
         token = localStorage.getItem('auctionToken');
         if (!token) {
           window.location.href = 'login.html';
@@ -629,6 +772,7 @@
             markUnsoldBtn.disabled = true;
           }
         }
+        //alert(window.innerHeight +" x "+ window.innerWidth);
       };
 
       /********************************************************************
@@ -672,10 +816,25 @@
       selectSetBtn.addEventListener('click', () => {
         const setName = setSelect.value;
         console.log('Emitting selectSet => ', setName);
-        socket.emit('selectSet', setName);
+        let aData = {
+          setName: setName,
+          auctionId: currentAuctionId
+        };
+        socket.emit('selectSet', aData);
       });
 
       socket.on('setChanged', (data) => {
+        console.log('set changed =>', data);
+        playersInSet = data.players;
+        let tableString = '<table><tbody>';
+        playersInSet.forEach(p => {
+          tableString += `<tr data-player-id="${p._id}" onclick="selectPlayer('${p._id}')">
+            <td><img src="${p.image}" alt="Player Image" /></td>
+            <td>${p.full_name}</td>
+            </tr>`;
+        });
+        tableString += '</tbody></table>';
+        searchResults.innerHTML = tableString;
         showPopup('Set changed to: ' + data.setName);
       });
 
@@ -857,6 +1016,7 @@
         
         currentPlayerDiv.innerHTML = `Current Player: ${playerData.full_name} (${playerData._id})`;
         currentBidDiv.innerHTML = `Final Bid: ${playerData.final_bid}`;
+        document.getElementById('headerStrip-player-link-popup').href = `https://cricheroes.in/player-profile${playerData.ch_profile}`;
         document.getElementById('headerStrip-player-logo-img').src = playerData.image || "./images/images-player.png";
         document.getElementById('headerStrip-player-name').innerHTML = playerData.full_name.replace(/\s+/, '<br/>');
         document.getElementById('headerStrip-player-category').innerHTML = '<b>' + (playerData.category || 'N/A') + '</b>';
@@ -1090,6 +1250,30 @@
           document.getElementById('headerStrip-biddingTeam').style.width = '0';
         }
       }
+
+      function selectPlayer(playerId) {
+        console.log('selectPlayer =>', playerId);
+        nextPlayerBtnClicked = true;
+        searchContainer.style.display = 'none';
+        socket.emit('nextPlayer', { auctionId: currentAuctionId, playerId: playerId });
+      }
+
+
+      function filterPlayers() {
+        const filterValue = document.getElementById('findPlayerSearchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#findPlayerSearchResults tbody tr');
+
+        rows.forEach(row => {
+          /* Get the text of each column in this row, converted to lower-case. */
+          const cellsText = Array.from(row.children).map(td => td.innerText.toLowerCase());
+          /* If any column text contains the filterValue, we let the row remain visible. */
+          const found = cellsText.some(txt => txt.includes(filterValue));
+          row.style.display = found ? '' : 'none';
+        });
+      }
+
+      /* Listen for 'input' events on the textbox so it filters in real time. */
+      document.getElementById('findPlayerSearchInput').addEventListener('input', filterPlayers);
     </script>
   </div>
 </body>

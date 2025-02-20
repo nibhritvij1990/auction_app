@@ -21,9 +21,12 @@ const PlayerSchema = new mongoose.Schema({
   wkts: { type: Number, default: 0 },
   econ: { type: Number, default: 0 }, // economy rate
   notes: { type: String, default: '' },
+  bat_style: { type: String, default: 'N/A' },
+  bowl_style: { type: String, default: 'N/A' },
 
   // Auction-related logic
   status: { type: String, default: 'available' }, // or 'sold', 'unsold'
+  auctionedAt: { type: String, default: null },
   final_bid: { type: Number, default: 0 },
   sold_to_team_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Team', default: null },
 });

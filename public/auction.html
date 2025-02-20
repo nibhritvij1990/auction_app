@@ -117,7 +117,7 @@
     }
     #players-table .item-box {
         display: grid;
-        grid-template-columns: 2fr repeat(5, 1fr);
+        grid-template-columns: 1.5fr 1fr 1fr 0.5fr 0.5fr 0.75fr;
         gap: 8px;
         text-transform: capitalize;
         margin: 0;
@@ -675,7 +675,7 @@
               <span><img src="${p.image || ''}" alt="" style="width:48px; height:48px;" /><b>${p.full_name}</b></span>
               <span>${p.category||'Category'}</span>
               <span>${p.auction_set||'Auction Set'}</span>
-              <span>${p.base_price||'null'}</span>
+              <span>${p.base_price||0}</span>
               <span>${p.status||'Status'}</span>
               <span>
                 <button class="controlBtns" onclick="editPlayer('${p._id}')"><span class="material-icons-outlined">edit</span></button>
@@ -772,7 +772,7 @@
         const playerArray = JSON.parse(rawJson);
         const res = await fetch('/api/players/bulk-create', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`  },
           body: JSON.stringify(playerArray)
         });
         const data = await res.json();

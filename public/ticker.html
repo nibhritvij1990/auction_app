@@ -288,6 +288,10 @@
     const headerStripPlayerStats = document.getElementById('headerStrip-player-stats-content');
     
     window.onload = function() {
+        var a = document.querySelectorAll("main footer button")
+        if (a && a.length > 0) {
+            a[0].click();
+        }
         const params = new URLSearchParams(window.location.search);
         const auctionId = params.get('auctionId');
         if (!auctionId) {
@@ -297,10 +301,8 @@
         currentAuctionId = auctionId;
 
         if (!currentPlayer) {
-            headerStripPlayerName.innerHTML = 'No player<br/>selected';
             headerStripPlayerCategory.innerHTML = '';
             headerStripBiddingTeamName.innerHTML = '';
-            headerStripBiddingTeamNameTitle.innerHTML = '';
             headerStripPlayerStats.innerHTML = '';
         }
     };
@@ -328,7 +330,7 @@
     }
 
     socket.on('connect', () => {
-    console.log('Connected as', socket.id);
+        console.log('Connected as', socket.id);
     });
 
     socket.on('currentPlayerChanged', (playerData) => {
@@ -348,7 +350,7 @@
         currentPlayerId = playerData._id;
         currentPlayer = playerData;
         
-        let playerNameArray = playerData.full_name.split(' ');
+        let playerNameArray = playerData.full_name.replace(/\s+/, 'ZOPHAR').split('ZOPHAR');
         headerStripPlayerLogoImg.src = playerData.image || "./images/images-player.png";
         headerStripPlayerNameFirst.innerHTML = playerNameArray[0];
         headerStripPlayerNameLast.innerHTML = playerNameArray[1];
@@ -402,7 +404,7 @@
             }
         } else {
             headerStripBiddingTeamName.innerHTML = '';
-            headerStripBiddingTeamBid.innerHTML = 'No bids...';
+            headerStripBiddingTeamBid.innerHTML = '';
             headerStripBiddingTeamLogo.parentElement.style.display = 'none';
         }
     });
@@ -447,7 +449,7 @@
 
             if (!lastBid) {
                 headerStripBiddingTeamName.innerHTML = '';
-                headerStripBiddingTeamNameTitle.innerHTML = 'No bids...';
+                headerStripBiddingTeamNameTitle.innerHTML = '';
                 console.log('No last bid found for this player');
                 return;
             } 
@@ -475,7 +477,7 @@
         } catch (err) {
             console.error('Error loading last bid:', err);
             headerStripBiddingTeamName.innerHTML = '';
-            headerStripBiddingTeamBid.innerHTML = 'No bids...';
+            headerStripBiddingTeamBid.innerHTML = '';
             headerStripBiddingTeamLogo.parentElement.style.display = 'none';
         }
     } 

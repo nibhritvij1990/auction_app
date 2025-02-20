@@ -69,19 +69,34 @@ const io = new Server(server, {
   let bidHistory = [50];  // so we can do undo
   let currentSet = null; // in-memory
 
-  io.on('connection', async(socket) => {
-    console.log('A user connected', socket.id);
+  let lastSoldPlayer = null;
 
-    socket.on('selectSet', (setName) => {
+  io.on('connection', async(socket) => {
+    const pageParam = socket.handshake?.query?.page; 
+    console.log('A user connected', socket.id, 'on page', pageParam);
+
+    socket.on('selectSet', async (aData) => {
         // If you have roles, check if (socket.role === 'admin'), etc.
-        console.log('Admin selected set:', setName);
-        currentSet = setName;
+        console.log('Admin selected set:', aData.setName);
+        currentSet = aData.setName;
+
+        let filters = {
+          auction_id: aData.auctionId,
+          status: { $in: ['available','Available'] }
+        };
+        if (currentSet !== 'All') {
+          filters.auction_set = currentSet;
+        }
+        const unsoldPlayers = await Player.find(filters);
         // Optionally broadcast to others that the set changed
-        io.emit('setChanged', { setName });
+        io.emit('setChanged', { "setName": aData.setName, "players": unsoldPlayers });
       });
 
     // On connect, send the current player info
-    if (currentPlayer && currentPlayer._id) {
+    if (pageParam && pageParam === 'ticker_lastSold') {
+      io.emit('playerSold', lastSoldPlayer);
+    } else {
+      if (currentPlayer && currentPlayer._id) {
         const p = await Player.findById(currentPlayer._id);
         if (!p || p.status != 'available') {
           // The DB says it's sold or doesn't exist => reset
@@ -94,6 +109,7 @@ const io = new Server(server, {
       } else {
         socket.emit('currentPlayerChanged', null);
       }
+    }
   //socket.emit('currentPlayerChanged', currentPlayer);
 
   /* socket.on('placeBid', async (data) => {
@@ -181,6 +197,9 @@ const io = new Server(server, {
       if (currentSet !== 'All') {
         filters.auction_set = currentSet;
       }
+      if (auctionData.playerId) {
+        filters._id = auctionData.playerId;
+      }
 
       const unsoldPlayers = await Player.find(filters);
 
@@ -214,7 +233,10 @@ const io = new Server(server, {
         overs: chosenPlayer.overs || '',
         wkts: chosenPlayer.wkts || '',
         econ: chosenPlayer.econ || '',
-        
+        ch_profile: chosenPlayer.ch_profile || '',
+        bat_style: chosenPlayer.bat_style || 'N/A',
+        bowl_style: chosenPlayer.bowl_style || 'N/A',
+        auction_set: chosenPlayer.auction_set || '',
         // etc.
       };
 
@@ -290,20 +312,22 @@ const io = new Server(server, {
       // Mark the player as sold
       player.status = 'sold';
       player.sold_to_team_id = teamId;
+      player.auctionedAt = (new Date()).toISOString();
       await player.save();
   
       // Broadcast to all that player is sold
-      io.emit('playerSold', { 
+      lastSoldPlayer = { 
         playerId: player._id, 
         final_bid: player.final_bid, 
         sold_to: team._id, 
         sold_to_team_id: team._id 
-      });
+      };
+      io.emit('playerSold', lastSoldPlayer);
     } catch(err) {
         console.error('Error marking player sold:', err);
         socket.emit('errorMsg', { error: err.message });
       }
-    });
+  });
 
     socket.on('markPlayerUnsold', async (data) => {
         try {
@@ -314,6 +338,7 @@ const io = new Server(server, {
           // revert final_bid to base_price
           player.final_bid = 0;
           player.status = 'unsold'; // or "available" if you prefer
+          player.auctionedAt = (new Date()).toISOString();
           await player.save();
       
           // Possibly remove any Bids for that player or keep them for reference

@@ -242,13 +242,14 @@
     <div id="teamsPlayersMatrix" class="team-matrix"></div>
   </div>
     
-
+  <script src="/socket.io/socket.io.js"></script>
   <script>
     const params = new URLSearchParams(window.location.search);
     const auctionId = params.get('auctionId');
+    const tabId = params.get('tab');
     const token = localStorage.getItem('auctionToken');
 
-
+    const socket = io();
 
     const playersViewBtn = document.getElementById('playersViewBtn');
     const teamsViewBtn = document.getElementById('teamsViewBtn');
@@ -279,6 +280,14 @@
       fetchSummaryData();
     });
 
+    if (tabId && tabId.includes('player')) {
+      playersViewDiv.classList.remove('hidden');
+      teamsViewDiv.classList.add('hidden');
+    } else if (tabId && tabId.includes('team')) {
+      teamsViewDiv.classList.remove('hidden');
+      playersViewDiv.classList.add('hidden');
+    }
+
     // On load, fetch summary data
     window.onload = async function() {
 
@@ -300,6 +309,24 @@
 
       fetchSummaryData(); 
     };
+
+    socket.on('connect', () => {
+        console.log('Connected as', socket.id);
+    });
+
+    socket.on('playerSold', (data) => {
+        console.log('playerSold =>', data);
+        fetchSummaryData();
+    });
+
+    socket.on('playerUnsold', (data) => {
+        console.log('playerUnsold =>', data);
+        fetchSummaryData();
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from server.');
+    });
 
     async function fetchSummaryData() {
       // Fetch summary data from the server

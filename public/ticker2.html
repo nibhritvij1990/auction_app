@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Auction Ticker</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="icon" href="./images/favicon.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    /* Basic styling */
+    html, body {
+      background-color: rgba(0, 177, 64, 0);
+      width: max-content;
+      height: max-content;
+      overflow: visible;
+    }
+    * {
+        box-sizing: border-box;
+    }
+    #ticker-container {
+        margin: 50px;
+        display: block;
+        width: 1000px;
+        height: 460px;
+        /*background:url("https://i.imgur.com/299ntea.png") no-repeat center center;*/
+        background-size: 100% 100%;
+        position: relative;
+    }
+    #ticker-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0);
+    }
+    #ticker-wrapper {
+        display: grid;
+        margin: 0 auto;
+        width: 880px;
+        height: 476px;
+        max-height: 476px;
+        overflow: visible;
+        grid-template-columns: 1fr 320px 400px 1fr;
+        grid-template-rows: 368px 108px ;
+        position: relative;
+        z-index: 10;
+    }
+    #p-name-column {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: flex-end;
+        transform: translateX(16px);
+    }
+    #p-name-column > span {
+        width: 85%;
+        height: 54px;
+        padding-left: 54px;
+        font-size: 32px;
+        font-weight: bold;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        transform: skew(-32deg);
+    }
+    #headerStrip-player-name-first-container {
+        background-color: #FE0188;
+    }
+    #headerStrip-player-name-last-container {
+        background-color: #3a28ec;
+    }
+    #headerStrip-player-name-first {
+        transform: skew(32deg);
+    }
+    #headerStrip-player-name-last {
+        transform: skew(32deg);
+    }
+    #p-card-column {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 320px 48px;
+        z-index: 99;
+    }
+    #p-image {
+        position: relative;
+    }
+    #headerStrip-player-logo-img {
+        width: 100%;
+        height: 100%;
+        border: 3px solid #FE0188;
+        box-shadow: 0 0 32px 4px #FE0188;
+    }
+    #headerStrip-player-category {
+        width: 100%;
+        height: 100%;
+        background-color: #25135c;
+        color: #fff;
+        font-size: 24px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid #FE0188;
+        border-top: none;
+        z-index: 1;
+    }
+    #p-bid-team-logo {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 120px;
+        height: 120px;
+        overflow: hidden;
+        border-radius: 50%;
+        transform: translate(-60%, -50%);
+        border: 3px solid #FE0188;
+    }
+    #headerStrip-biddingTeam-logo-img {
+        width: 100%;
+        height: 100%;
+    }
+    #p-bid {
+        font-size: 24px;
+        color: #fff;
+        transform: skew(32deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+    }
+    #p-bid-title {
+        
+    }
+    #headerStrip-biddingTeam-bid {
+        color: #FE0188;
+        font-size: 48px;
+        font-weight: bold;
+    }
+    #p-bid-column {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 192px 1fr 1fr;
+    }
+    #p-bid-column > span {
+        width: 100%;
+        height: 100%;
+        padding-left: 50px;
+        font-size: 42px;
+        font-weight: bold;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        transform: translate(-32px, 0px) skew(-32deg);
+    }
+    #headerStrip-biddingTeam-name-container {
+        transform: skew(32deg);
+        font-size: 42px;
+        color: #fff;
+        font-weight: lighter;
+    }
+    #p-stats-wrapper {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr 1fr;
+        background-color: #25135c;
+        position: relative;
+        clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+    }
+    div[id^="headerStrip-player-stats-content-row"] {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 0 60px;
+        font-weight: bold;
+        position: relative;
+        font-size: 18px;
+    }
+    div[id^="headerStrip-player-stats-content-row"] > span:nth-child(odd) {
+        color: #ffffff;
+        margin-left: 12px;
+        margin-right: 8px;
+    }
+    div[id^="headerStrip-player-stats-content-row"] > span:nth-child(even) {
+        color: #FE0188;
+        margin-right: 12px;
+    }
+    div[id^="headerStrip-player-stats-content-row"]::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 32px;
+        width: 18px;
+        height: 18px;
+        background-color: white;
+        transform: translateY(-50%);
+    }
+    #headerStrip-player-stats-content-row1::after {
+        background: url('./images/icon-matches.svg') no-repeat center center;
+        background-size: 100% 100%;
+    }
+    #headerStrip-player-stats-content-row2::after {
+        background: url('./images/icon-bat.svg') no-repeat center center;
+        background-size: 100% 100%;
+    }
+    #headerStrip-player-stats-content-row3::after {
+        background: url('./images/icon-bowl.svg') no-repeat center center;
+        background-size: 100% 100%;
+    }
+    #p-stats-row {
+        grid-column: 1 / 5;
+        transform: translate(-42px, 0px) skew(-32deg);
+        background-color: #25135c;
+        z-index: -1;
+        position: relative;
+        transform-style: preserve-3d;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 100px 0 64px;
+    }
+    #p-stats-row::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: white;
+        z-index: -2;
+        transform: translate(10px, 10px) translateZ(-1px);
+    }
+    #headerStrip-player-stats-content {
+        margin-bottom: 24px;
+        transform: skew(32deg);
+    }
+    #headerStrip-player-stats-content span {
+        font-size: 24px;
+        font-weight: bold;
+        padding: 2px 4px;
+    }
+    #headerStrip-player-stats-content span:nth-child(odd) {
+      color: #ffffff;
+      margin-left: 20px;
+    }
+    #headerStrip-player-stats-content span:nth-child(even) {
+      color: #FE0188;
+      margin-right: 20px;
+    }
+  </style>
+</head>
+<body>
+
+    <div id="ticker-container">
+        <div id="ticker-wrapper">
+            <div class="space-filler"></div>
+            <div id="p-card-column">
+                <div id="p-image">
+                    <img id="headerStrip-player-logo-img" src="./images/images-player.png" alt=""/>
+                    <div id="p-bid-team-logo">
+                        <img id="headerStrip-biddingTeam-logo-img" src="./images/images-team.jpg" alt=""/>
+                    </div>
+                </div>
+                <span id="headerStrip-player-category">Bowling All-Rounder</span>
+            </div>
+            <div id="p-bid-column">
+                <div id="p-stats-wrapper">
+                    <div id="headerStrip-player-stats-content-row1">
+                        <span>M</span><span> 100</span>
+                        
+                    </div>
+                    <div id="headerStrip-player-stats-content-row2">
+                        <span>M</span><span> 100</span>
+                        
+                    </div>
+                    <div id="headerStrip-player-stats-content-row3">
+                        <span>M</span><span> 100</span>
+                        
+                    </div>
+                </div>
+                <span id="headerStrip-player-name-first-container">
+                    <span id="headerStrip-player-name-first">Player</span>
+                </span>
+                <span id="headerStrip-player-name-last-container">
+                    <span id="headerStrip-player-name-last">Name</span>
+                </span>
+            </div>
+            <div class="space-filler"></div>
+            <div id="p-stats-row">
+                <div id="p-bid">
+                    <span id="p-bid-title">Current Bid</span>
+                    <span id="headerStrip-biddingTeam-bid">$2100</span>
+                </div>
+                <span id="headerStrip-biddingTeam-name-container">
+                    <span id="headerStrip-biddingTeam-name">Kinetic Warriors</span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    let currentAuctionId = null; 
+    let currentPlayerId  = null;
+    let currentPlayer = null;
+    let user = {
+        role: 'guest',    
+        teamId: null      
+    };
+    let auctionData = null;
+    let playersData = null;
+    let teamsData = null;
+    const socket = io();
+
+    const headerStripPlayerLogoImg = document.getElementById('headerStrip-player-logo-img');
+    const headerStripPlayerNameFirst = document.getElementById('headerStrip-player-name-first');
+    const headerStripPlayerNameLast = document.getElementById('headerStrip-player-name-last');
+    const headerStripPlayerCategory = document.getElementById('headerStrip-player-category');
+    const headerStripBiddingTeamName = document.getElementById('headerStrip-biddingTeam-name');
+    const headerStripBiddingTeamBid = document.getElementById('headerStrip-biddingTeam-bid');
+    const headerStripBiddingTeamLogo = document.getElementById('headerStrip-biddingTeam-logo-img');
+    //const headerStripPlayerStats = document.getElementById('headerStrip-player-stats-content');
+    const headerStripPlayerStatsRow1 = document.getElementById('headerStrip-player-stats-content-row1');
+    const headerStripPlayerStatsRow2 = document.getElementById('headerStrip-player-stats-content-row2');
+    const headerStripPlayerStatsRow3 = document.getElementById('headerStrip-player-stats-content-row3');
+    
+    window.onload = function() {
+        const params = new URLSearchParams(window.location.search);
+        const auctionId = params.get('auctionId');
+        if (!auctionId) {
+          document.body.innerHTML = '<p>No valid Auction selected.</p>';
+          return;
+        }
+        currentAuctionId = auctionId;
+
+        if (!currentPlayer) {
+            headerStripPlayerCategory.innerHTML = '';
+            headerStripBiddingTeamName.innerHTML = '';
+            headerStripPlayerStatsRow1.innerHTML = '';
+            headerStripPlayerStatsRow2.innerHTML = '';
+            headerStripPlayerStatsRow3.innerHTML = '';
+        }
+    };
+
+    async function authenticate() {
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: 'guest',
+                    password: 'guest'
+                })
+            });
+
+            if (!response.ok) throw new Error('Failed to authenticate');
+            const data = await response.json();
+            return data.token; // Store the token
+        } catch (err) {
+            console.error('Error during authentication:', err);
+            showPopup('Authentication failed.');
+        }
+    }
+
+    socket.on('connect', () => {
+        console.log('Connected as', socket.id);
+    });
+
+    socket.on('currentPlayerChanged', (playerData) => {
+        console.log('currentPlayerChanged =>', playerData);
+        if (!playerData || !playerData._id) {
+            currentPlayerId = null;
+            headerStripPlayerLogoImg.src = "./images/images-player.png";
+            headerStripPlayerNameFirst.innerHTML = '';
+            headerStripPlayerNameLast.innerHTML = '';
+            headerStripPlayerCategory.innerHTML = '';
+            headerStripBiddingTeamName.innerHTML = '';
+            headerStripBiddingTeamBid.innerHTML = '';
+            headerStripBiddingTeamLogo.parentElement.style.display = 'none';
+            headerStripPlayerStatsRow1.innerHTML = '';
+            headerStripPlayerStatsRow2.innerHTML = '';
+            headerStripPlayerStatsRow3.innerHTML = '';
+            return;
+        }
+        currentPlayerId = playerData._id;
+        currentPlayer = playerData;
+        
+        let playerNameArray = playerData.full_name.replace(/\s+/, 'ZOPHAR').split('ZOPHAR');
+        headerStripPlayerLogoImg.src = playerData.image || "./images/images-player.png";
+        headerStripPlayerNameFirst.innerHTML = playerNameArray[0];
+        headerStripPlayerNameLast.innerHTML = playerNameArray[1];
+        headerStripPlayerCategory.innerHTML = playerData.category;
+        headerStripPlayerStatsRow1.innerHTML = `
+            <span>M</span><span> ${playerData.matches || '-'}</span>
+            `;
+        headerStripPlayerStatsRow2.innerHTML = `
+            <span>R</span><span> ${playerData.runs || 'N/A'}</span>
+            <span>A</span><span> ${playerData.avg || 'N/A'}</span>
+            <span>Sr</span><span> ${playerData.sr || 'N/A'}</span>
+            `;
+        headerStripPlayerStatsRow3.innerHTML = `            
+            <span>O</span><span> ${playerData.overs || 'N/A'}</span>
+            <span>W</span><span> ${playerData.wkts || 'N/A'}</span>
+            <span>E</span><span> ${playerData.econ || 'N/A'}</span>
+        `;
+        headerStripBiddingTeamLogo.parentElement.style.display = 'block';
+        headerStripBiddingTeamLogo.parentElement.style.border = '3px solid #FE0188';
+
+        //document.getElementById('headerStrip-player-sold').style.display = 'none';
+        //document.getElementById('headerStrip-player-unsold').style.display = 'none';
+
+        loadLatestBid();
+    });
+
+    socket.on('bidUpdated', async (data) => {
+        console.log('bidUpdated =>', data);
+
+        if (data.final_bid && data.teamId) {
+            try {
+                const token = await authenticate();
+                const response = await fetch(`/api/teams/${data.teamId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (!response.ok) throw new Error('Failed to fetch team data');
+                const currentTeam = await response.json();
+                if (currentPlayerId === data.playerId) {
+                    headerStripBiddingTeamName.innerHTML = `$${data.final_bid}`;
+                    headerStripBiddingTeamLogo.parentElement.style.border = '3px solid #FE0188';
+                    headerStripBiddingTeamName.innerHTML = currentTeam.team_name;
+                    headerStripBiddingTeamBid.innerHTML = `$${data.final_bid}`;
+                    headerStripBiddingTeamLogo.src = currentTeam.image || "";
+                    if (currentTeam.image) {
+                        headerStripBiddingTeamLogo.parentElement.style.display = 'block';
+                    } else {
+                        headerStripBiddingTeamLogo.parentElement.style.display = 'none';
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching team data:', err);
+                showPopup('Could not fetch the data for this team.');
+            }
+        } else {
+            headerStripBiddingTeamName.innerHTML = '';
+            headerStripBiddingTeamBid.innerHTML = '';
+            headerStripBiddingTeamLogo.parentElement.style.display = 'none';
+        }
+    });
+
+    socket.on('playerSold', (data) => {
+        console.log('playerSold =>', data);
+        if (data.playerId === currentPlayerId) {
+            currentPlayerId = null;
+            //document.getElementById('headerStrip-player-sold').style.display = 'block';
+            headerStripBiddingTeamLogo.src = "./images/sold-ticker.png";
+            headerStripBiddingTeamLogo.parentElement.style.display = 'block';
+        }
+    });
+
+    socket.on('playerUnsold', (data) => {
+        console.log('playerUnsold =>', data);
+        if (data.playerId === currentPlayerId) {
+            currentPlayerId = null;
+            //document.getElementById('headerStrip-player-unsold').style.display = 'block';
+            headerStripBiddingTeamName.innerHTML = '';
+            headerStripBiddingTeamBid.innerHTML = '!Unsold!';
+            headerStripBiddingTeamLogo.src = "./images/unsold-ticker.png";
+            headerStripBiddingTeamLogo.parentElement.style.display = 'block';
+            headerStripBiddingTeamLogo.parentElement.style.border = '3px solid #25135c';
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from server.');
+    });
+
+    async function loadLatestBid() {
+        try {
+            const token = await authenticate();   
+            const response = await fetch(`/api/players/${currentPlayerId}/last-bid`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) throw new Error('Failed to fetch last bid');
+            const lastBid = await response.json();
+
+            if (!lastBid) {
+                headerStripBiddingTeamName.innerHTML = '';
+                headerStripBiddingTeamNameTitle.innerHTML = '';
+                console.log('No last bid found for this player');
+                return;
+            } 
+            console.log('Last bid found for this player', lastBid);
+
+            
+            const teamResponse = await fetch(`/api/teams/${lastBid.team_id}`, {
+                headers: {
+                'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!teamResponse.ok) throw new Error('Failed to fetch team data');
+            const bidTeam = await teamResponse.json();
+
+            headerStripBiddingTeamName.innerHTML = bidTeam.team_name;
+            headerStripBiddingTeamBid.innerHTML = `$${lastBid.amount}`;
+            headerStripBiddingTeamLogo.src = bidTeam.image || "";
+            if (bidTeam.image) {
+                headerStripBiddingTeamLogo.parentElement.style.display = 'block';
+            } else {
+                headerStripBiddingTeamLogo.parentElement.style.display = 'none';
+            }
+
+
+        } catch (err) {
+            console.error('Error loading last bid:', err);
+            headerStripBiddingTeamName.innerHTML = '';
+            headerStripBiddingTeamBid.innerHTML = '';
+            headerStripBiddingTeamLogo.parentElement.style.display = 'none';
+        }
+    } 
+  </script>
+</body>
+</html>

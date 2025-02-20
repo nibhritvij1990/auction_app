@@ -88,8 +88,8 @@
     // Basic client-side code for handling the login.
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
+      const username = document.getElementById('username').value.toLowerCase();
+      const password = document.getElementById('password').value.toLowerCase();
 
       try {
         const response = await fetch('/api/auth/login', {
@@ -100,12 +100,18 @@
         const data = await response.json();
 
         if (response.ok && data.token) {
-          // Store token in localStorage (or sessionStorage)
-          localStorage.setItem('auctionToken', data.token);
-          // Show success or redirect to an admin page
-          document.getElementById('message').innerText = 'Login successful!';
-         
+            localStorage.setItem('auctionToken', data.token);
+            document.getElementById('message').innerText = 'Login successful!';
+
+            if (data.tokenPayload.role === 'admin') {
               window.location = '/admin.html';
+            } else if (data.tokenPayload.role === 'team_owner') {
+              window.location = '/pre-auction.html';
+            } else if (data.tokenPayload.role === 'guest') {
+              window.location = '/dashboard.html';
+            } else {
+              window.location = '/admin.html';
+            }
           
         } else {
           // Show error

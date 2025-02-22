@@ -64,22 +64,12 @@ const io = new Server(server, {
   let currentSet = null;
   let lastSoldPlayer = null;
 
-  let pageParam = null;
-
   io.on('connection', async(socket) => {
-    pageParam = socket.handshake?.query?.page; 
+    const pageParam = socket.handshake?.query?.page; 
     console.log('A user connected', socket.id, 'on page', pageParam);
-  });
-
-  io.of(/^\/auction\/.+$/).on("connection", async (socket) => { // Regex for /auction/:auctionId
-    const namespace = socket.nsp; // Get the namespace object
-    const auctionId = namespace.name.split('/').pop(); // Extract auctionId from /auction/XYZ
-    console.log(`Client connected to auction namespace: ${auctionId}`, socket.id);
-
     // On connect, send the current player info
     if (pageParam && pageParam === 'ticker_lastSold') {
-      namespace.emit('playerSold', lastSoldPlayer);
-
+      io.emit('playerSold', lastSoldPlayer);
     } else {
       if (currentPlayer && currentPlayer._id) {
         const p = await Player.findById(currentPlayer._id);
@@ -105,16 +95,12 @@ const io = new Server(server, {
           auction_id: aData.auctionId,
           status: { $in: ['available','Available'] }
         };
-        let filters2 = {
-          auction_id: aData.auctionId
-        };
         if (currentSet !== 'All') {
           filters.auction_set = currentSet;
         }
         const unsoldPlayers = await Player.find(filters);
-        const currentSetPlayers = await Player.find(filters2);
         // Optionally broadcast to others that the set changed
-        namespace.emit('setChanged', { "setName": aData.setName, "players": unsoldPlayers, "currentSetPlayers": currentSetPlayers });
+        io.emit('setChanged', { "setName": aData.setName, "players": unsoldPlayers });
       });
 
 
@@ -123,7 +109,7 @@ const io = new Server(server, {
         const { auctionId, playerId, teamId } = data;
         const updatedPlayer = await placeBidLogic({ auctionId, playerId, teamId });
         // broadcast
-        namespace.emit('bidUpdated', {
+        io.emit('bidUpdated', {
           playerId: updatedPlayer._id,
           final_bid: updatedPlayer.final_bid,
           teamId,
@@ -149,7 +135,7 @@ const io = new Server(server, {
 
         console.log(`Updated ${result.modifiedCount} players from unsold to available.`);
         // Then broadcast either a refresh event or success message
-        namespace.emit('allUnsoldAsAvailableDone', { modifiedCount: result.modifiedCount });
+        io.emit('allUnsoldAsAvailableDone', { modifiedCount: result.modifiedCount });
 
       } catch (err) {
         console.error('Error in markAllUnsoldAsAvailable:', err);
@@ -182,7 +168,7 @@ const io = new Server(server, {
         const unsoldPlayers = await Player.find(filters);
 
         if (unsoldPlayers.length === 0) {
-          namespace.emit('currentPlayerChanged', null); 
+          io.emit('currentPlayerChanged', null); 
           return;
         }
 
@@ -220,7 +206,7 @@ const io = new Server(server, {
         };
 
         // broadcast
-        namespace.emit('currentPlayerChanged', currentPlayer);
+        io.emit('currentPlayerChanged', currentPlayer);
       } catch (err) {
         console.error('Error in nextPlayer:', err);
         socket.emit('errorMsg', 'Server error picking next player.');
@@ -259,7 +245,7 @@ const io = new Server(server, {
         }
         await player.save();
     
-        namespace.emit('bidUpdated', {
+        io.emit('bidUpdated', {
           playerId: player._id,
           final_bid: player.final_bid,
           teamId: prevBid ? prevBid.team_id : null,
@@ -301,7 +287,7 @@ const io = new Server(server, {
           sold_to: team._id, 
           sold_to_team_id: team._id 
         };
-        namespace.emit('playerSold', lastSoldPlayer);
+        io.emit('playerSold', lastSoldPlayer);
       } catch(err) {
           console.error('Error marking player sold:', err);
           socket.emit('errorMsg', { error: err.message });
@@ -323,7 +309,7 @@ const io = new Server(server, {
             // Possibly remove any Bids for that player or keep them for reference
             await Bid.deleteMany({ player_id: playerId });
         
-            namespace.emit('playerUnsold', { 
+            io.emit('playerUnsold', { 
               playerId: player._id,
               final_bid: 0
             });

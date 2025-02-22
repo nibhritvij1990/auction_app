@@ -93,12 +93,25 @@
         height: 100%;
         object-fit: cover;
     }
-    .playerInSet span {
+    .playerInSet .playerInSet-name {
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
         text-align: center;
+        font-size: 8px;
+        background-color: #fff;
+        color: #000;
+    }
+    .playerInSet .playerInSet-number {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 12px;
+        width: 12px;
         font-size: 8px;
         background-color: #fff;
         color: #000;
@@ -313,6 +326,10 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
+
+    const params = new URLSearchParams(window.location.search);
+    const auctionId = params.get('auctionId');
+
     let currentAuctionId = null; 
     let currentPlayerId  = null;
     let currentPlayer = null;
@@ -327,7 +344,7 @@
     let currentSet = null;
     let currentSetPlayers = null;
 
-    const socket = io();
+    const socket = io(`/auction/${auctionId}`); // Connect to the namespace
 
     const headerStripPlayerLogoImg = document.getElementById('headerStrip-player-logo-img');
     const headerStripPlayerNameFirst = document.getElementById('headerStrip-player-name-first');
@@ -350,8 +367,8 @@
     window.addEventListener('load', adjustZoom);
 
     window.onload = function() {
-        const params = new URLSearchParams(window.location.search);
-        const auctionId = params.get('auctionId');
+        //const params = new URLSearchParams(window.location.search);
+        //const auctionId = params.get('auctionId');
         if (!auctionId) {
           document.body.innerHTML = '<p>No valid Auction selected.</p>';
           return;
@@ -443,7 +460,7 @@
         }
         currentPlayerId = playerData._id;
         currentPlayer = playerData;
-        if (currentSet != "All") currentSet = playerData.auction_set;
+        currentSet = playerData.current_set;
 
         let playerNameArray = playerData.full_name.replace(/\s+/, 'ZOPHAR').split('ZOPHAR');
         
@@ -487,7 +504,9 @@
     async function loadPlayersInSet() {
         try {
             const token = await authenticate();
-            const response = await fetch(`/api/players?auction_id=${currentAuctionId}&auction_set=${currentSet}`, {
+            let url = `/api/players?auction_id=${currentAuctionId}`;
+            if (currentSet != "All") url += `&auction_set=${currentSet}`;
+            const response = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -497,11 +516,14 @@
             console.log('playersInSet =>', playersInSet);
 
             let playerString = '';
+            let i=1;
             playersInSet.forEach(player => {
                 playerString += `<div class="playerInSet">
                     <img src="${player.image}" alt="${player.full_name}" />
-                    <span>${player.full_name.split(' ')[0]}</span>
+                    <span class="playerInSet-name">${player.full_name.split(' ')[0]}</span>
+                    <span class="playerInSet-number">${i}</span>
                 </div>`;
+                i++;
             });
             document.getElementById('current-set-body').innerHTML = playerString;
         } catch (err) {

@@ -644,7 +644,9 @@
 
       let token = null;
 
-      const socket = io();
+      const params = new URLSearchParams(window.location.search);
+      const auctionId = params.get('auctionId');
+      const socket = io(`/auction/${auctionId}`); // Connect to the namespace
 
       /********************************************************************
        * DOM ELEMENTS
@@ -714,8 +716,7 @@
           return;
         }
 
-        const params = new URLSearchParams(window.location.search);
-        const auctionId = params.get('auctionId');
+        
         if (!auctionId) {
           document.body.innerHTML = '<p>No valid Auction selected.</p>';
           return;
